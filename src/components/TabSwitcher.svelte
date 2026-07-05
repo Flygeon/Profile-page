@@ -8,14 +8,14 @@
     <button
       class="tab-btn"
       class:active={activeTab === 'projects'}
-      on:click={() => onTabChange('projects')}
+      onclick={() => onTabChange('projects')}
     >
       我的项目
     </button>
     <button
       class="tab-btn"
       class:active={activeTab === 'bio'}
-      on:click={() => onTabChange('bio')}
+      onclick={() => onTabChange('bio')}
     >
       个人简介
     </button>
