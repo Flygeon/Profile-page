@@ -43,10 +43,12 @@
   }
 
   .card {
-    background-color: #1a1a1a;
+    background-color: rgba(26, 26, 26, 0.55);
     border: 1px solid #2a2a2a;
     border-radius: 16px;
     padding: 20px;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
   }
 
   .buttons-container {

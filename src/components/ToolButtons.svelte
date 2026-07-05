@@ -1,5 +1,6 @@
 <script>
-  // 在线工具配置
+  import { cardGradient } from '../lib/cardGradient.js'
+  
   const toolLinks = [
     {
       name: '博客',
@@ -25,7 +26,7 @@
 </script>
 
 <section class="tool-section">
-  <div class="card">
+  <div class="card" use:cardGradient>
     <div class="buttons-container">
       {#each toolLinks as link}
         <a 
@@ -48,10 +49,33 @@
   }
 
   .card {
-    background-color: #1a1a1a;
+    position: relative;
+    overflow: hidden;
+    background-color: rgba(26, 26, 26, 0.55);
     border: 1px solid #2a2a2a;
     border-radius: 16px;
     padding: 20px;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(
+      300px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(255, 255, 255, 0.06),
+      transparent 40%
+    );
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+
+  .card:hover::after {
+    opacity: 1;
   }
 
   .buttons-container {
