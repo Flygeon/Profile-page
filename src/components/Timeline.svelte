@@ -1,5 +1,6 @@
 <script>
   import entries from '../data/timeline.json'
+  import { cardGradient } from '../lib/cardGradient.js'
 
   const DEFAULT_COUNT = 3
   let expanded = false
@@ -49,10 +50,12 @@
   }
 
   .card {
-    background-color: #1a1a1a;
+    background-color: rgba(26, 26, 26, 0.55);
     border: 1px solid #2a2a2a;
     border-radius: 16px;
     padding: 20px 24px;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
   }
 
   .timeline-header {

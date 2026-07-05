@@ -1,7 +1,6 @@
 <script>
   import { onMount, onDestroy } from 'svelte'
 
-  // 个人信息配置 - 预留替换接口
   export let avatarUrl = '/avatar.webp'
   export let name = 'Flygeon'
   export let cherryEnabled = true
@@ -10,8 +9,30 @@
   export let onToggleTheme = () => {}
   export let musicVisible = true
   export let onToggleMusic = () => {}
+  
+  export let showClock = true
+  export let showNotice = true
+  export let showCalendar = true
+  export let showTodo = true
+  export let onToggleCard = () => {}
 
-  // 打字机标语列表
+  const greetings = [
+    { range: [0, 5],  icon: '🌙', text: '夜深了，早点休息' },
+    { range: [5, 8],  icon: '🌅', text: '早上好，新的一天' },
+    { range: [8, 12], icon: '☀️', text: '上午好，元气满满' },
+    { range: [12, 14], icon: '🌤️', text: '中午好，记得吃饭' },
+    { range: [14, 18], icon: '☀️', text: '下午好，继续加油' },
+    { range: [18, 21], icon: '🌆', text: '傍晚好，放松一下' },
+    { range: [21, 24], icon: '🌙', text: '晚上好，享受夜晚' }
+  ]
+
+  function getGreeting() {
+    const hour = new Date().getHours()
+    return greetings.find(g => hour >= g.range[0] && hour < g.range[1]) || greetings[0]
+  }
+
+  $: greeting = getGreeting()
+
   const taglines = [
     '音无结弦之时，悦动天使之心',
     '立于浮华之世，奏响天籁之音',
@@ -72,7 +93,6 @@
     clearInterval(cursorTimer)
   })
 
-  // 设置面板
   let showSettings = false
 
   function toggleSettings() {
@@ -93,22 +113,25 @@
 
   <h1 class="name">{name}</h1>
 
+  <p class="greeting">
+    <span class="greeting-icon">{greeting.icon}</span>
+    {greeting.text}
+  </p>
+
   <p class="tagline">
     {displayText}<span class="cursor" class:blink={cursorVisible}>|</span>
   </p>
 </section>
 
-<!-- 右上角按钮组 -->
 <div class="top-btns">
-  <button class="theme-btn" on:click={onToggleTheme} aria-label={isDarkMode ? '切换浅色模式' : '切换深色模式'}>
+  <button class="theme-btn" onclick={onToggleTheme} aria-label={isDarkMode ? '切换浅色模式' : '切换深色模式'}>
     <i class="fa-solid fa-{isDarkMode ? 'sun' : 'moon'}"></i>
   </button>
-  <button class="settings-btn" on:click={toggleSettings} aria-label="设置">
+  <button class="settings-btn" onclick={toggleSettings} aria-label="设置">
     <i class="fa-solid fa-gear"></i>
   </button>
 </div>
 
-<!-- 设置面板 -->
 {#if showSettings}
   <div
     class="settings-overlay"
@@ -116,41 +139,101 @@
     aria-modal="true"
     aria-label="设置面板"
     tabindex="-1"
-    on:click={closeSettings}
-    on:keydown={(e) => e.key === 'Escape' && toggleSettings()}
+    onclick={closeSettings}
+    onkeydown={(e) => e.key === 'Escape' && toggleSettings()}
   >
     <div class="settings-panel">
       <div class="settings-header">
         <span>设置</span>
-        <button class="settings-close" on:click={toggleSettings} aria-label="关闭设置">
+        <button class="settings-close" onclick={toggleSettings} aria-label="关闭设置">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
-      <div class="settings-item">
-        <span class="settings-label">樱花特效</span>
-        <button
-          class="toggle-switch"
-          class:active={cherryEnabled}
-          on:click={onToggleCherry}
-          role="switch"
-          aria-checked={cherryEnabled}
-          aria-label="切换樱花特效"
-        >
-          <span class="toggle-knob"></span>
-        </button>
+      
+      <div class="settings-section">
+        <div class="settings-section-title">视觉效果</div>
+        <div class="settings-item">
+          <span class="settings-label">樱花特效</span>
+          <button
+            class="toggle-switch"
+            class:active={cherryEnabled}
+            onclick={onToggleCherry}
+            role="switch"
+            aria-checked={cherryEnabled}
+            aria-label="切换樱花特效"
+          >
+            <span class="toggle-knob"></span>
+          </button>
+        </div>
+        <div class="settings-item">
+          <span class="settings-label">音乐播放器</span>
+          <button
+            class="toggle-switch"
+            class:active={musicVisible}
+            onclick={onToggleMusic}
+            role="switch"
+            aria-checked={musicVisible}
+            aria-label="切换音乐播放器"
+          >
+            <span class="toggle-knob"></span>
+          </button>
+        </div>
       </div>
-      <div class="settings-item">
-        <span class="settings-label">音乐播放器</span>
-        <button
-          class="toggle-switch"
-          class:active={musicVisible}
-          on:click={onToggleMusic}
-          role="switch"
-          aria-checked={musicVisible}
-          aria-label="切换音乐播放器"
-        >
-          <span class="toggle-knob"></span>
-        </button>
+      
+      <div class="settings-section">
+        <div class="settings-section-title">侧边卡片</div>
+        <div class="settings-item">
+          <span class="settings-label">时间显示</span>
+          <button
+            class="toggle-switch"
+            class:active={showClock}
+            onclick={() => onToggleCard('clock')}
+            role="switch"
+            aria-checked={showClock}
+            aria-label="切换时间显示"
+          >
+            <span class="toggle-knob"></span>
+          </button>
+        </div>
+        <div class="settings-item">
+          <span class="settings-label">公告栏</span>
+          <button
+            class="toggle-switch"
+            class:active={showNotice}
+            onclick={() => onToggleCard('notice')}
+            role="switch"
+            aria-checked={showNotice}
+            aria-label="切换公告栏"
+          >
+            <span class="toggle-knob"></span>
+          </button>
+        </div>
+        <div class="settings-item">
+          <span class="settings-label">日历</span>
+          <button
+            class="toggle-switch"
+            class:active={showCalendar}
+            onclick={() => onToggleCard('calendar')}
+            role="switch"
+            aria-checked={showCalendar}
+            aria-label="切换日历"
+          >
+            <span class="toggle-knob"></span>
+          </button>
+        </div>
+        <div class="settings-item">
+          <span class="settings-label">待办事项</span>
+          <button
+            class="toggle-switch"
+            class:active={showTodo}
+            onclick={() => onToggleCard('todo')}
+            role="switch"
+            aria-checked={showTodo}
+            aria-label="切换待办事项"
+          >
+            <span class="toggle-knob"></span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -162,6 +245,7 @@
     flex-direction: column;
     align-items: center;
     gap: 12px;
+    animation: entrance 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
   }
 
   .top-btns {
@@ -220,6 +304,20 @@
     margin-top: 4px;
   }
 
+  .greeting {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.65);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    animation: entrance 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.05s both;
+  }
+
+  .greeting-icon {
+    font-size: 16px;
+    line-height: 1;
+  }
+
   .tagline {
     font-size: 16px;
     color: #888888;
@@ -245,7 +343,6 @@
     opacity: 0;
   }
 
-  /* 设置面板 */
   .settings-overlay {
     position: fixed;
     top: 0;
@@ -266,6 +363,8 @@
     border-radius: 16px;
     padding: 20px;
     width: 280px;
+    max-height: 80vh;
+    overflow-y: auto;
     animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
@@ -301,6 +400,23 @@
     color: #ffffff;
   }
 
+  .settings-section {
+    margin-bottom: 16px;
+  }
+
+  .settings-section:last-child {
+    margin-bottom: 0;
+  }
+
+  .settings-section-title {
+    font-size: 11px;
+    color: #555555;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    padding-left: 2px;
+  }
+
   .settings-item {
     display: flex;
     align-items: center;
@@ -313,7 +429,6 @@
     color: #cccccc;
   }
 
-  /* 开关按钮 */
   .toggle-switch {
     width: 44px;
     height: 24px;
@@ -352,6 +467,17 @@
     to { opacity: 1; }
   }
 
+  @keyframes entrance {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
   @keyframes slideUp {
     from {
       opacity: 0;
@@ -371,6 +497,10 @@
 
     .name {
       font-size: 28px;
+    }
+
+    .greeting {
+      font-size: 13px;
     }
 
     .tagline {

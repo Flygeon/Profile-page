@@ -1,0 +1,53 @@
+{
+  "categories": [
+    {
+      "devices": [
+        {
+          "brand": "Microsoft",
+          "model": "Surface Pro 5",
+          "features": "微软亲儿子，触屏和2K很爽，喜欢，即使它并不好用",
+          "specs": {
+            "处理器": "Intel Core i5-7300U",
+            "内存": "8GB LPDDR3",
+            "存储": "128GB SSD",
+            "显卡": "Intel HD Graphics 620",
+            "显示器": "LG"
+          },
+          "usage": "日常开发主力机，由于本人穷b只能凑合用这个"
+        }
+      ]
+    },
+    {
+      "devices": [
+        {
+          "brand": "Apple",
+          "model": "iPhone XR",
+          "features": "传奇钉子户，传家宝凑活能用",
+          "specs": {
+            "处理器": "A12 Pro",
+            "屏幕": "6.1寸 Liquid Retina LCD 1792×828",
+            "存储": "128GB",
+            "系统": "iOS 18.3"
+          },
+          "usage": "日用需要"
+        }
+      ]
+    },
+    {
+      "devices": [
+        {
+          "brand": "CUKTECH",
+          "model": "CP25",
+          "features": "酷态科真好用吧，贵是贵了点",
+          "specs": {
+            "容量": "20000mAh",
+            "功率": "55W MAX",
+            "接口": "2C1A + 自带USB-C线",
+            "协议": "PD3.1/QC5/PPS/UFCS"
+          },
+          "usage": "给我的电脑和散热器供电，外出也可以应急，就是重了点只能塞包里"
+        }
+      ]
+    }
+  ]
+}

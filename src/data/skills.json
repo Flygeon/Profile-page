@@ -1,0 +1,45 @@
+{
+  "categories": [
+    {
+      "name": "前端技术",
+      "icon": "fa-solid fa-code",
+      "skills": [
+        { "name": "HTML / CSS", "level": "advanced" },
+        { "name": "Astro", "level": "intermediate" },
+        { "name": "Svelte", "level": "intermediate" },
+        { "name": "JavaScript", "level": "beginner" },
+        { "name": "Vue", "level": "beginner" }
+      ]
+    },
+    {
+      "name": "后端 & 工具",
+      "icon": "fa-solid fa-server",
+      "skills": [
+        { "name": "Git", "level": "advanced" },
+        { "name": "Node.js", "level": "intermediate" },
+        { "name": "Python", "level": "intermediate" },
+        { "name": "Docker", "level": "intermediate" },
+        { "name": "Linux", "level": "intermediate" }
+      ]
+    },
+    {
+      "name": "创意工具",
+      "icon": "fa-solid fa-palette",
+      "skills": [
+        { "name": "Vocaloid 调教", "level": "advanced" },
+        { "name": "视频剪辑", "level": "intermediate" },
+        { "name": "MMD / 3D 动画", "level": "beginner" },
+        { "name": "音频混音", "level": "beginner" }
+      ]
+    },
+    {
+      "name": "语言能力",
+      "icon": "fa-solid fa-language",
+      "skills": [
+        { "name": "中文", "level": "advanced" },
+        { "name": "English", "level": "intermediate" },
+        { "name": "日本語", "level": "beginner" }
+      ]
+    }
+  ]
+}

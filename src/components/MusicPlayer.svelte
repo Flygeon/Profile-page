@@ -1,51 +1,79 @@
 <script>
-  import { onDestroy } from 'svelte'
+  import { onMount, onDestroy } from 'svelte'
   import { fade } from 'svelte/transition'
 
-  // 手动填写歌单：id 用于生成播放链接，其余字段按需修改
   const songs = [
     { id: 22826401,  title: 'God knows...', artist: '平野綾', cover: 'https://p2.music.126.net/H8G-oFG_4z34t_qikgFvkQ==/109951172808538419.jpg?param=130y130' },
     { id: 471795, title: 'My Soul, Your Beats!', artist: 'Lia', cover: 'https://p1.music.126.net/2xc1ZXSTxNkW8u-c9Emdgw==/109951170245717432.jpg?param=130y130' },
   ].map(s => ({ ...s, url: `https://music.163.com/song/media/outer/url?id=${s.id}.mp3` }))
 
-  let currentIndex = 0
-  let isPlaying = false
-  let error = null
+  let currentIndex = $state(0)
+  let isPlaying = $state(false)
+  let error = $state(null)
   let audioEl = null
-  let expanded = false
+  let expanded = $state(false)
 
-  $: currentSong = songs[currentIndex] || null
+  let currentSong = $derived(songs[currentIndex] || null)
+
+  onMount(() => {
+    console.log('onMount audioEl:', audioEl)
+    if (audioEl && currentSong) {
+      audioEl.src = currentSong.url
+    }
+  })
 
   function selectAndPlay(index) {
     if (index === currentIndex) {
-      // 点击当前歌曲：切换播放/暂停
       togglePlay()
       return
     }
     currentIndex = index
     if (audioEl) {
       audioEl.src = songs[index].url
+      audioEl.load()
       audioEl.play().then(() => {
         isPlaying = true
       }).catch(() => {
         isPlaying = false
+        const playHandler = () => {
+          audioEl.play().then(() => {
+            isPlaying = true
+          }).catch(() => {
+            isPlaying = false
+          })
+          audioEl.removeEventListener('canplaythrough', playHandler)
+        }
+        audioEl.addEventListener('canplaythrough', playHandler)
       })
     }
   }
 
   function togglePlay() {
+    console.log('togglePlay called', { audioEl: !!audioEl, isPlaying })
     if (!audioEl || !songs.length) return
     if (isPlaying) {
       audioEl.pause()
       isPlaying = false
     } else {
-      if (!audioEl.src) {
+      if (!audioEl.src || audioEl.src !== songs[currentIndex].url) {
         audioEl.src = songs[currentIndex].url
+        audioEl.load()
       }
       audioEl.play().then(() => {
         isPlaying = true
-      }).catch(() => {
+        console.log('play succeeded')
+      }).catch((err) => {
         isPlaying = false
+        console.log('play failed', err)
+        const playHandler = () => {
+          audioEl.play().then(() => {
+            isPlaying = true
+          }).catch(() => {
+            isPlaying = false
+          })
+          audioEl.removeEventListener('canplaythrough', playHandler)
+        }
+        audioEl.addEventListener('canplaythrough', playHandler)
       })
     }
   }
@@ -81,6 +109,7 @@
   }
 
   function toggleExpand() {
+    console.log('toggleExpand called')
     expanded = !expanded
   }
 
@@ -95,15 +124,16 @@
 <div class="float-widget">
   <audio
     bind:this={audioEl}
-    on:ended={onAudioEnd}
-    on:error={onAudioError}
-    on:canplay={onAudioCanPlay}
-    on:pause={() => isPlaying = false}
+    preload="metadata"
+    onended={onAudioEnd}
+    onerror={onAudioError}
+    oncanplay={onAudioCanPlay}
+    onpause={() => isPlaying = false}
   ></audio>
 
   <div class="player-container" class:expanded>
     <!-- ===== 迷你播放条（始终可见） ===== -->
-    <div class="mini-bar" on:click={toggleExpand} on:keydown={(e) => e.key === 'Enter' && toggleExpand()} role="button" tabindex="0" aria-label={expanded ? '收起' : '展开'}>
+    <div class="mini-bar" onclick={toggleExpand} onkeydown={(e) => e.key === 'Enter' && toggleExpand()} role="button" tabindex="0" aria-label={expanded ? '收起' : '展开'}>
       <!-- 封面缩略图 -->
       <div class="mini-cover">
         {#if currentSong}
@@ -112,7 +142,7 @@
             class:spinning={isPlaying}
             src={currentSong.cover}
             alt=""
-            on:error={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex' }}
+            onerror={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex' }}
           />
         {/if}
         <span class="mini-fallback" style="display: {currentSong ? 'none' : 'flex'}">
@@ -129,7 +159,7 @@
       <!-- 播放按钮 -->
       <button
         class="play-btn-mini"
-        on:click|stopPropagation={togglePlay}
+        onclick={(e) => { e.stopPropagation(); togglePlay(); }}
         aria-label={isPlaying ? '暂停' : '播放'}
       >
         <i class="fa-solid fa-{isPlaying ? 'pause' : 'play'}"></i>
@@ -158,7 +188,7 @@
               class="playlist-item"
               class:active={i === currentIndex}
               class:playing={i === currentIndex && isPlaying}
-              on:click={() => selectAndPlay(i)}
+              onclick={() => selectAndPlay(i)}
             >
               <!-- 序号 / 播放状态图标 -->
               <span class="item-index">
@@ -176,7 +206,7 @@
                 class="item-cover"
                 src={song.cover}
                 alt=""
-                on:error={(e) => {
+                onerror={(e) => {
                   e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect fill="%23222" width="40" height="40"/><text x="20" y="25" text-anchor="middle" fill="%23555" font-size="14">♪</text></svg>'
                 }}
               />
