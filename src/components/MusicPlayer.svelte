@@ -1,11 +1,9 @@
 <script>
   import { onMount, onDestroy } from 'svelte'
   import { fade } from 'svelte/transition'
+  import musicData from '../data/music.json'
 
-  const songs = [
-    { id: 22826401,  title: 'God knows...', artist: '平野綾', cover: 'https://p2.music.126.net/H8G-oFG_4z34t_qikgFvkQ==/109951172808538419.jpg?param=130y130' },
-    { id: 471795, title: 'My Soul, Your Beats!', artist: 'Lia', cover: 'https://p1.music.126.net/2xc1ZXSTxNkW8u-c9Emdgw==/109951170245717432.jpg?param=130y130' },
-  ].map(s => ({ ...s, url: `https://music.163.com/song/media/outer/url?id=${s.id}.mp3` }))
+  const songs = musicData.map(s => ({ ...s, url: `https://music.163.com/song/media/outer/url?id=${s.id}.mp3` }))
 
   let currentIndex = $state(0)
   let isPlaying = $state(false)
@@ -104,8 +102,6 @@
 
   function onAudioCanPlay() {
     error = null
-    isPlaying = true
-    audioEl?.play().catch(() => { isPlaying = false })
   }
 
   function toggleExpand() {
