@@ -1,5 +1,5 @@
 <script>
-  import skillsData from '../data/skills.json'
+  import config from '../data/config.js'
 
   const levelConfig = {
     'beginner':     { label: '入门',   barWidth: '30%',  color: '#888888', bg: 'rgba(136,136,136,0.12)' },
@@ -15,7 +15,7 @@
   </div>
 
   <div class="skills-grid">
-    {#each skillsData.categories as category}
+    {#each config.skills.categories as category}
       <div class="skill-category-card">
         <div class="category-header">
           <i class={category.icon}></i>

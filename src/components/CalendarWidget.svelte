@@ -52,37 +52,49 @@
 </script>
 
 <div class="calendar-widget" class:mounted>
-  <div class="calendar-header">
-    <button class="nav-btn" onclick={prevMonth} aria-label="上一月">
-      <i class="fa-solid fa-chevron-left"></i>
-    </button>
-    <button class="calendar-title" onclick={goToToday} aria-label="回到今天">
-      {currentYear}年{currentMonth}月
-    </button>
-    <button class="nav-btn" onclick={nextMonth} aria-label="下一月">
-      <i class="fa-solid fa-chevron-right"></i>
-    </button>
-  </div>
-  
-  <div class="calendar-weekdays">
-    {#each DAYS as day}
-      <span class="weekday">{day}</span>
-    {/each}
-  </div>
-  
-  <div class="calendar-days">
-    {#each calendarDays as day}
-      <span 
-        class="calendar-day" 
-        class:other-month={!day}
-        class:today={day === today.getDate() && 
-                   currentMonth === today.getMonth() + 1 && 
-                   currentYear === today.getFullYear()}
-      >
-        {day || ''}
-      </span>
-    {/each}
-  </div>
+  {#if mounted}
+    <div class="calendar-header">
+      <button class="nav-btn" onclick={prevMonth} aria-label="上一月">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <button class="calendar-title" onclick={goToToday} aria-label="回到今天">
+        {currentYear}年{currentMonth}月
+      </button>
+      <button class="nav-btn" onclick={nextMonth} aria-label="下一月">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+    </div>
+
+    <div class="calendar-weekdays">
+      {#each DAYS as day}
+        <span class="weekday">{day}</span>
+      {/each}
+    </div>
+
+    <div class="calendar-days">
+      {#each calendarDays as day}
+        <span
+          class="calendar-day"
+          class:other-month={!day}
+          class:today={day === today.getDate() &&
+                     currentMonth === today.getMonth() + 1 &&
+                     currentYear === today.getFullYear()}
+        >
+          {day || ''}
+        </span>
+      {/each}
+    </div>
+  {:else}
+    <div class="calendar-skeleton">
+      <div class="skeleton skeleton-cal-header"></div>
+      <div class="skeleton skeleton-cal-weekdays"></div>
+      <div class="skeleton-cal-grid">
+        {#each Array(31) as _}
+          <div class="skeleton skeleton-cal-cell"></div>
+        {/each}
+      </div>
+    </div>
+  {/if}
 </div>
 
 <style>
@@ -196,5 +208,37 @@
     .calendar-widget {
       display: none;
     }
+  }
+
+  /* ===== 骨架屏 ===== */
+  .calendar-skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .skeleton-cal-header {
+    height: 28px;
+    width: 60%;
+    margin: 0 auto;
+    border-radius: 6px;
+  }
+
+  .skeleton-cal-weekdays {
+    height: 24px;
+    width: 100%;
+    border-radius: 4px;
+  }
+
+  .skeleton-cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+
+  .skeleton-cal-cell {
+    aspect-ratio: 1;
+    border-radius: 4px;
+    height: 24px;
   }
 </style>

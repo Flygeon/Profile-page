@@ -1,5 +1,10 @@
 <script>
-  // 社交链接配置
+  export let onNavigate = (link) => {
+    if (typeof window !== 'undefined' && link?.url) {
+      window.location.assign(link.url)
+    }
+  }
+
   const socialLinks = [
     {
       name: 'B站',
@@ -23,15 +28,15 @@
   <div class="card">
     <div class="buttons-container">
       {#each socialLinks as link}
-        <a 
-          href={link.url} 
-          target="_blank" 
-          rel="noopener noreferrer"
+        <button
+          type="button"
           class="social-button"
+          onclick={() => onNavigate(link)}
+          aria-label={`打开 ${link.name}`}
         >
           <i class={link.icon}></i>
           <span>{link.name}</span>
-        </a>
+        </button>
       {/each}
     </div>
   </div>

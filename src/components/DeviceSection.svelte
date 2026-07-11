@@ -1,5 +1,6 @@
 <script>
-  import devices from '../data/devices.json'
+  import config from '../data/config.js'
+  const devices = config.devices
 </script>
 
 <section class="device-section">

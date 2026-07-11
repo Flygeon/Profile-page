@@ -1,7 +1,7 @@
 <script>
-  import todosData from '../data/todos.json'
-  
-  const todos = todosData
+  import config from '../data/config.js'
+
+  const todos = config.todos
   let mounted = $state(false)
   
   setTimeout(() => {
@@ -12,20 +12,35 @@
 </script>
 
 <div class="todo-widget" class:mounted>
-  <div class="todo-header">
-    <i class="fa-solid fa-list-check"></i>
-    <span>待办事项</span>
-    <span class="todo-count">{completedCount}/{todos.length}</span>
-  </div>
-  
-  <div class="todo-list">
-    {#each todos as todo}
-      <div class="todo-item" class:done={todo.done}>
-        <i class="fa-solid {todo.done ? 'fa-check-circle' : 'fa-circle'}"></i>
-        <span>{todo.text}</span>
-      </div>
-    {/each}
-  </div>
+  {#if mounted}
+    <div class="todo-header">
+      <i class="fa-solid fa-list-check"></i>
+      <span>待办事项</span>
+      <span class="todo-count">{completedCount}/{todos.length}</span>
+    </div>
+
+    <div class="todo-list">
+      {#each todos as todo}
+        <div class="todo-item" class:done={todo.done}>
+          <i class="fa-solid {todo.done ? 'fa-check-circle' : 'fa-circle'}"></i>
+          <span>{todo.text}</span>
+        </div>
+      {/each}
+    </div>
+  {:else}
+    <div class="todo-header">
+      <i class="fa-solid fa-list-check"></i>
+      <span>待办事项</span>
+    </div>
+    <div class="todo-skeleton">
+      {#each Array(4) as _}
+        <div class="skeleton-row">
+          <div class="skeleton skeleton-todo-icon"></div>
+          <div class="skeleton skeleton-todo-text"></div>
+        </div>
+      {/each}
+    </div>
+  {/if}
 </div>
 
 <style>
@@ -111,5 +126,32 @@
     .todo-widget {
       display: none;
     }
+  }
+
+  /* ===== 骨架屏 ===== */
+  .todo-skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 14px;
+  }
+
+  .skeleton-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .skeleton-todo-icon {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .skeleton-todo-text {
+    height: 14px;
+    flex: 1;
+    border-radius: 4px;
   }
 </style>

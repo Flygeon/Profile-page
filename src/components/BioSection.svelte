@@ -1,7 +1,6 @@
 <script>
   import DeviceSection from './DeviceSection.svelte'
   import SkillsSection from './SkillsSection.svelte'
-  import { cardGradient } from '../lib/cardGradient.js'
 
   let subTab = $state('intro')
 
