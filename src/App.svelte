@@ -2,6 +2,8 @@
   import HeaderSection from './components/HeaderSection.svelte'
   import SocialButtons from './components/SocialButtons.svelte'
   import ToolButtons from './components/ToolButtons.svelte'
+  import LinkTransitionOverlay from './components/LinkTransitionOverlay.svelte'
+  import Snowflakes from './components/Snowflakes.svelte'
   import CherryBlossom from './components/CherryBlossom.svelte'
   import TabSwitcher from './components/TabSwitcher.svelte'
   import BioSection from './components/BioSection.svelte'
@@ -12,21 +14,32 @@
   import CalendarWidget from './components/CalendarWidget.svelte'
   import TodoWidget from './components/TodoWidget.svelte'
   import CookieConsent from './components/CookieConsent.svelte'
-  import { cardGradient } from './lib/cardGradient.js'
   import { getCookie, setCookie } from './lib/cookie.js'
+  import config from './data/config.js'
 
-  let cherryEnabled = $state(true)
+  // 特效模式: 'snow' | 'sakura' | 'none'
+  let effectMode = $state('snow')
   let isDarkMode = $state(true)
   let activeTab = $state('projects')
   let musicVisible = $state(true)
-  
+
   let showClock = $state(true)
   let showNotice = $state(true)
   let showCalendar = $state(true)
   let showTodo = $state(true)
 
-  function toggleCherry() {
-    cherryEnabled = !cherryEnabled
+  let linkTransitionVisible = $state(false)
+  let linkTransitionTitle = $state('')
+  let linkTransitionHost = $state('')
+  let linkTransitionUrl = $state('')
+  let linkTransitionTimer = null
+
+  let linkTransitionEnabled = $state(config.linkTransition.enabled ?? true)
+  const linkTransitionDelayMs = config.linkTransition.delayMs ?? 1000
+  const linkTransitionParticleCount = config.linkTransition.particleCount ?? 24
+
+  function setEffectMode(mode) {
+    effectMode = mode
     saveSettings()
   }
 
@@ -51,16 +64,54 @@
     if (cardName === 'todo') showTodo = !showTodo
     saveSettings()
   }
-  
+
+  function toggleLinkTransition() {
+    linkTransitionEnabled = !linkTransitionEnabled
+    saveSettings()
+  }
+
+  function getHostname(url) {
+    try {
+      return new URL(url).hostname.replace(/^www\./, '')
+    } catch {
+      return url
+    }
+  }
+
+  function handleExternalNavigate(link) {
+    if (!link?.url || typeof window === 'undefined') return
+
+    if (!linkTransitionEnabled) {
+      window.location.assign(link.url)
+      return
+    }
+
+    if (linkTransitionVisible) return
+
+    linkTransitionTitle = link.name || '????'
+    linkTransitionHost = getHostname(link.url)
+    linkTransitionUrl = link.url
+    linkTransitionVisible = true
+
+    if (linkTransitionTimer) {
+      clearTimeout(linkTransitionTimer)
+    }
+
+    linkTransitionTimer = window.setTimeout(() => {
+      window.location.assign(link.url)
+    }, linkTransitionDelayMs)
+  }
+
   function saveSettings() {
     const settings = {
-      cherryEnabled,
+      effectMode,
       isDarkMode,
       musicVisible,
       showClock,
       showNotice,
       showCalendar,
-      showTodo
+      showTodo,
+      linkTransitionEnabled
     }
     setCookie('user_settings', settings, 365)
   }
@@ -68,24 +119,35 @@
   function loadSettings() {
     const saved = getCookie('user_settings')
     if (saved) {
-      cherryEnabled = saved.cherryEnabled ?? true
+      effectMode = saved.effectMode ?? 'snow'
       isDarkMode = saved.isDarkMode ?? true
       musicVisible = saved.musicVisible ?? true
       showClock = saved.showClock ?? true
       showNotice = saved.showNotice ?? true
       showCalendar = saved.showCalendar ?? true
       showTodo = saved.showTodo ?? true
+      linkTransitionEnabled = saved.linkTransitionEnabled ?? true
     }
   }
   
-  import { onMount } from 'svelte'
+  import { onMount, onDestroy } from 'svelte'
   onMount(() => {
     loadSettings()
   })
+
+  onDestroy(() => {
+    if (linkTransitionTimer) {
+      clearTimeout(linkTransitionTimer)
+    }
+  })
 </script>
 
-<div class="page-wrapper" use:cardGradient>
-  <CherryBlossom enabled={cherryEnabled} />
+<div class="page-wrapper">
+  {#if effectMode === 'snow'}
+    <Snowflakes enabled={true} />
+  {:else if effectMode === 'sakura'}
+    <CherryBlossom enabled={true} />
+  {/if}
   <div class="bg-overlay" class:hidden={isDarkMode}></div>
   <CookieConsent />
 
@@ -102,8 +164,8 @@
 
       <div class="container">
         <HeaderSection
-          cherryEnabled={cherryEnabled}
-          onToggleCherry={toggleCherry}
+          effectMode={effectMode}
+          onSetEffectMode={setEffectMode}
           isDarkMode={isDarkMode}
           onToggleTheme={toggleTheme}
           musicVisible={musicVisible}
@@ -113,6 +175,8 @@
           showCalendar={showCalendar}
           showTodo={showTodo}
           onToggleCard={toggleCard}
+          linkTransitionEnabled={linkTransitionEnabled}
+          onToggleLinkTransition={toggleLinkTransition}
         />
         <div class="entrance-item" style="animation-delay: 80ms">
           <TabSwitcher
@@ -122,10 +186,10 @@
         </div>
         {#if activeTab === 'projects'}
           <div class="entrance-item" style="animation-delay: 160ms">
-            <SocialButtons />
+            <SocialButtons onNavigate={handleExternalNavigate} />
           </div>
           <div class="entrance-item" style="animation-delay: 240ms">
-            <ToolButtons />
+            <ToolButtons onNavigate={handleExternalNavigate} />
           </div>
           <div class="entrance-item" style="animation-delay: 400ms">
             <Timeline />
@@ -147,6 +211,15 @@
       </div>
     </div>
   </main>
+
+  <LinkTransitionOverlay
+    open={linkTransitionVisible}
+    title={linkTransitionTitle}
+    host={linkTransitionHost}
+    url={linkTransitionUrl}
+    delayMs={linkTransitionDelayMs}
+    particleCount={linkTransitionParticleCount}
+  />
 
   {#if musicVisible}
     <MusicPlayer />
@@ -171,6 +244,17 @@
                  'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  :global(.skeleton) {
+    background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
   }
 
   .bg-overlay {
@@ -244,24 +328,6 @@
 
   .right-panel {
     align-items: flex-end;
-  }
-
-  .page-wrapper::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(
-      400px circle at var(--mouse-x, 50vw) var(--mouse-y, 50vh),
-      rgba(255, 255, 255, 0.12),
-      transparent 25%
-    );
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    pointer-events: none;
-  }
-
-  .page-wrapper:hover::after {
-    opacity: 1;
   }
 
   @keyframes entrance {

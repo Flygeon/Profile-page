@@ -28,10 +28,17 @@
 </script>
 
 <div class="clock-widget" class:mounted>
-  <div class="clock-display">
-    <span class="clock-time">{time}</span>
-    <span class="clock-date">{date}</span>
-  </div>
+  {#if mounted}
+    <div class="clock-display">
+      <span class="clock-time">{time}</span>
+      <span class="clock-date">{date}</span>
+    </div>
+  {:else}
+    <div class="clock-display">
+      <div class="skeleton skeleton-time"></div>
+      <div class="skeleton skeleton-date"></div>
+    </div>
+  {/if}
 </div>
 
 <style>
@@ -85,5 +92,19 @@
     .clock-widget {
       display: none;
     }
+  }
+
+  /* ===== 骨架屏 ===== */
+  .skeleton-time {
+    width: 180px;
+    height: 42px;
+    border-radius: 8px;
+  }
+
+  .skeleton-date {
+    width: 130px;
+    height: 16px;
+    border-radius: 4px;
+    margin-top: 4px;
   }
 </style>

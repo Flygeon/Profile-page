@@ -1,20 +1,23 @@
 <script>
   import { onMount, onDestroy } from 'svelte'
 
-  export let avatarUrl = '/avatar.webp'
-  export let name = 'Flygeon'
-  export let cherryEnabled = true
-  export let onToggleCherry = () => {}
-  export let isDarkMode = true
-  export let onToggleTheme = () => {}
-  export let musicVisible = true
-  export let onToggleMusic = () => {}
-  
-  export let showClock = true
-  export let showNotice = true
-  export let showCalendar = true
-  export let showTodo = true
-  export let onToggleCard = () => {}
+  let {
+    avatarUrl = '/avatar.webp',
+    name = 'Flygeon',
+    effectMode = 'snow',
+    onSetEffectMode = () => {},
+    isDarkMode = true,
+    onToggleTheme = () => {},
+    musicVisible = true,
+    onToggleMusic = () => {},
+    showClock = true,
+    showNotice = true,
+    showCalendar = true,
+    showTodo = true,
+    onToggleCard = () => {},
+    linkTransitionEnabled = true,
+    onToggleLinkTransition = () => {}
+  } = $props()
 
   const greetings = [
     { range: [0, 5],  icon: '🌙', text: '夜深了，早点休息' },
@@ -31,7 +34,7 @@
     return greetings.find(g => hour >= g.range[0] && hour < g.range[1]) || greetings[0]
   }
 
-  $: greeting = getGreeting()
+  let greeting = $derived(getGreeting())
 
   const taglines = [
     '音无结弦之时，悦动天使之心',
@@ -39,11 +42,11 @@
     '我喜欢你'
   ]
 
-  let displayText = ''
-  let cursorVisible = true
-  let taglineIndex = 0
-  let charIndex = 0
-  let isDeleting = false
+  let displayText = $state('')
+  let cursorVisible = $state(true)
+  let taglineIndex = $state(0)
+  let charIndex = $state(0)
+  let isDeleting = $state(false)
   let timer = null
 
   const TYPE_SPEED = 120
@@ -93,10 +96,20 @@
     clearInterval(cursorTimer)
   })
 
-  let showSettings = false
+  let showSettings = $state(false)
+  let effectDropdownOpen = $state(false)
+
+  const effectOptions = [
+    { value: 'sakura', label: '樱花', icon: '🌸' },
+    { value: 'snow', label: '雪花', icon: '❄️' },
+    { value: 'none', label: '关闭', icon: '🚫' },
+  ]
+
+  let currentEffect = $derived(effectOptions.find(o => o.value === effectMode) || effectOptions[1])
 
   function toggleSettings() {
     showSettings = !showSettings
+    if (!showSettings) effectDropdownOpen = false
   }
 
   function closeSettings(e) {
@@ -153,17 +166,33 @@
       <div class="settings-section">
         <div class="settings-section-title">视觉效果</div>
         <div class="settings-item">
-          <span class="settings-label">樱花特效</span>
-          <button
-            class="toggle-switch"
-            class:active={cherryEnabled}
-            onclick={onToggleCherry}
-            role="switch"
-            aria-checked={cherryEnabled}
-            aria-label="切换樱花特效"
-          >
-            <span class="toggle-knob"></span>
-          </button>
+          <span class="settings-label">飘落特效</span>
+          <div class="select-trigger" tabindex="0" role="combobox" aria-expanded={effectDropdownOpen} aria-label="选择飘落特效"
+            onclick={() => effectDropdownOpen = !effectDropdownOpen}
+            onkeydown={(e) => e.key === 'Enter' && (effectDropdownOpen = !effectDropdownOpen)}
+            onmouseleave={() => effectDropdownOpen = false}>
+            <span class="select-trigger-value">
+              <span class="select-item-icon">{currentEffect.icon}</span>
+              {currentEffect.label}
+            </span>
+            <span class="select-arrow" class:open={effectDropdownOpen}>
+              <i class="fa-solid fa-chevron-down"></i>
+            </span>
+            {#if effectDropdownOpen}
+              <div class="select-dropdown" onclick={(e) => e.stopPropagation()}>
+                {#each effectOptions as opt}
+                  <button
+                    class="select-item"
+                    class:selected={effectMode === opt.value}
+                    onclick={() => { onSetEffectMode(opt.value); effectDropdownOpen = false; }}
+                  >
+                    <span class="select-item-icon">{opt.icon}</span>
+                    {opt.label}
+                  </button>
+                {/each}
+              </div>
+            {/if}
+          </div>
         </div>
         <div class="settings-item">
           <span class="settings-label">音乐播放器</span>
@@ -174,6 +203,19 @@
             role="switch"
             aria-checked={musicVisible}
             aria-label="切换音乐播放器"
+          >
+            <span class="toggle-knob"></span>
+          </button>
+        </div>
+        <div class="settings-item">
+          <span class="settings-label">跳转过渡</span>
+          <button
+            class="toggle-switch"
+            class:active={linkTransitionEnabled}
+            onclick={onToggleLinkTransition}
+            role="switch"
+            aria-checked={linkTransitionEnabled}
+            aria-label="切换跳转过渡动画"
           >
             <span class="toggle-knob"></span>
           </button>
@@ -460,6 +502,92 @@
 
   .toggle-switch.active .toggle-knob {
     transform: translateX(20px);
+  }
+
+  /* 特效下拉框选择器 */
+  .select-trigger {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    min-width: 108px;
+    padding: 5px 10px;
+    background-color: #252525;
+    border: 1px solid #333333;
+    border-radius: 6px;
+    color: #cccccc;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: inherit;
+    transition: border-color 0.2s ease;
+    user-select: none;
+  }
+
+  .select-trigger:hover {
+    border-color: #555555;
+  }
+
+  .select-trigger-value {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .select-arrow {
+    display: flex;
+    align-items: center;
+    font-size: 10px;
+    color: #666666;
+    transition: transform 0.2s ease;
+  }
+
+  .select-arrow.open {
+    transform: rotate(180deg);
+  }
+
+  .select-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background-color: #1e1e1e;
+    border: 1px solid #333333;
+    border-radius: 6px;
+    overflow: hidden;
+    z-index: 10;
+    animation: fadeIn 0.15s ease;
+  }
+
+  .select-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    width: 100%;
+    padding: 6px 10px;
+    border: none;
+    background: none;
+    color: #aaaaaa;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: inherit;
+    text-align: left;
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+
+  .select-item:hover {
+    background-color: #2a2a2a;
+    color: #ffffff;
+  }
+
+  .select-item.selected {
+    background-color: #333333;
+    color: #ffffff;
+  }
+
+  .select-item-icon {
+    font-size: 14px;
+    line-height: 1;
   }
 
   @keyframes fadeIn {
