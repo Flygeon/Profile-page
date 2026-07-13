@@ -47,21 +47,17 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 24px 20px;
-    background-color: rgba(26, 26, 26, 0.45);
+    padding: 18px;
+    background-color: #1a1a1a;
     border: 1px solid #2a2a2a;
     border-radius: 16px;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    opacity: 0;
-    transform: translateX(-16px);
-    transition: opacity 0.6s ease, transform 0.6s ease;
     user-select: none;
+    opacity: 0;
+    transition: opacity 0.6s ease;
   }
 
   .clock-widget.mounted {
     opacity: 1;
-    transform: translateX(0);
   }
 
   .clock-display {

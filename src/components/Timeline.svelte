@@ -25,18 +25,37 @@
     return `${y}-${m}-${day}`
   }
 
+  function decodeEntities(s) {
+    if (!s) return ''
+    // DOMParser 在 text/html 模式下会自动反转义 &lt; &gt; &amp; &quot; &#39; 等
+    try {
+      const doc = new DOMParser().parseFromString(s, 'text/html')
+      return (doc.body.textContent || '').trim()
+    } catch {
+      return s
+    }
+  }
+
   function parseRSSItems(xmlText) {
     const parser = new DOMParser()
     const doc = parser.parseFromString(xmlText, 'text/xml')
+    // 解析错误时 doc.documentElement 会出现 <parsererror>
+    if (doc.querySelector('parsererror')) return []
+
     const items = doc.querySelectorAll('item')
     if (!items.length) {
       // 尝试 Atom 格式
       const atomEntries = doc.querySelectorAll('entry')
+      if (!atomEntries.length) return []
       return Array.from(atomEntries).map(entry => {
         const title = entry.querySelector('title')?.textContent || ''
         const link = entry.querySelector('link')?.getAttribute('href') || ''
         const date = entry.querySelector('published')?.textContent || entry.querySelector('updated')?.textContent || ''
-        const desc = entry.querySelector('summary')?.textContent?.slice(0, 120) || entry.querySelector('content')?.textContent?.slice(0, 120) || ''
+        const desc = decodeEntities(
+          entry.querySelector('summary')?.textContent?.slice(0, 120) ||
+          entry.querySelector('content')?.textContent?.slice(0, 120) ||
+          ''
+        )
         return { title, link, date, desc }
       })
     }
@@ -44,18 +63,38 @@
       const title = item.querySelector('title')?.textContent || ''
       const link = item.querySelector('link')?.textContent || item.querySelector('link')?.getAttribute('href') || ''
       const pubDate = item.querySelector('pubDate')?.textContent || item.querySelector('dc\\:date')?.textContent || ''
-      const desc = item.querySelector('description')?.textContent?.replace(/<[^>]*>/g, '').slice(0, 120) || ''
+      const rawDesc = item.querySelector('description')?.textContent || ''
+      // 关键：先反转义 HTML 实体（&lt;p&gt;），再去标签、取前 120 字
+      const desc = decodeEntities(rawDesc).replace(/<[^>]*>/g, '').slice(0, 120)
       return { title, link, date: pubDate, desc }
     })
   }
 
+  async function fetchTextWithFallback() {
+    // 1) 直连
+    try {
+      const res = await fetch('https://flygeon.top/rss.xml', { cache: 'no-store' })
+      if (res.ok) return await res.text()
+      throw new Error(`HTTP ${res.status}`)
+    } catch (e1) {
+      // 2) allorigins 代理（CORS 兜底）
+      const proxyRes = await fetch(
+        `https://api.allorigins.win/raw?url=${encodeURIComponent('https://flygeon.top/rss.xml')}`,
+        { cache: 'no-store' }
+      )
+      if (!proxyRes.ok) throw new Error(`Proxy HTTP ${proxyRes.status}`)
+      return await proxyRes.text()
+    }
+  }
+
   async function fetchRSS() {
-    // 尝试读缓存
+    // 尝试读缓存（仅信任非空缓存）
     const cached = localStorage.getItem(CACHE_KEY)
     if (cached) {
       try {
         const { data, timestamp } = JSON.parse(cached)
-        if (Date.now() - timestamp < CACHE_TTL) {
+        // 关键：缓存为空数组视为损坏，必须强制刷新
+        if (Array.isArray(data) && data.length > 0 && Date.now() - timestamp < CACHE_TTL) {
           blogEntries = data
           loading = false
           return
@@ -64,19 +103,12 @@
     }
 
     try {
-      // 优先直接请求，失败则走 CORS 代理
-      let xmlText
-      try {
-        const res = await fetch('https://flygeon.top/rss.xml')
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        xmlText = await res.text()
-      } catch {
-        // 跨域回退：用 allorigins 代理
-        const proxyRes = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent('https://flygeon.top/rss.xml')}`)
-        xmlText = await proxyRes.text()
-      }
+      const xmlText = await fetchTextWithFallback()
 
       const raw = parseRSSItems(xmlText)
+      // 关键：解析出 0 条说明源端/代理都返回了非 RSS 内容
+      if (raw.length === 0) throw new Error('RSS 解析为空（可能源端结构变化或代理返回了非 XML 内容）')
+
       const entries = raw.map((item, i) => ({
         id: `blog-${i}-${Date.now()}`,
         date: item.date ? formatDate(item.date) : '',
@@ -89,10 +121,12 @@
       blogEntries = entries
       rssError = false
 
-      // 写入缓存
-      try {
-        localStorage.setItem(CACHE_KEY, JSON.stringify({ data: entries, timestamp: Date.now() }))
-      } catch { /* 存储满忽略 */ }
+      // 关键：仅当成功解析到内容时才写缓存；空数据绝不覆盖旧缓存
+      if (entries.length > 0) {
+        try {
+          localStorage.setItem(CACHE_KEY, JSON.stringify({ data: entries, timestamp: Date.now() }))
+        } catch { /* 存储满忽略 */ }
+      }
     } catch (e) {
       console.warn('RSS 加载失败:', e)
       rssError = true
@@ -116,6 +150,14 @@
       <span class="timeline-title">最近更新</span>
       {#if loading}
         <span class="timeline-status loading">加载中…</span>
+      {:else if rssError}
+        <button
+          class="timeline-status error"
+          onclick={() => { rssError = false; loading = true; fetchRSS() }}
+          title="点击重试"
+        >
+          博客拉取失败 · 重试
+        </button>
       {/if}
     </div>
 
@@ -195,6 +237,24 @@
     font-size: 10px;
     color: #555;
     animation: pulse 1.2s ease-in-out infinite;
+  }
+
+  .timeline-status.error {
+    font-size: 10px;
+    color: #e57373;
+    background: none;
+    border: 1px solid rgba(229, 115, 115, 0.3);
+    border-radius: 6px;
+    padding: 2px 8px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s ease;
+  }
+
+  .timeline-status.error:hover {
+    color: #ff8a8a;
+    border-color: rgba(229, 115, 115, 0.6);
+    background: rgba(229, 115, 115, 0.08);
   }
 
   @keyframes pulse {

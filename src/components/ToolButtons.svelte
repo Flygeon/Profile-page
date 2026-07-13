@@ -5,8 +5,39 @@
       window.location.assign(link.url)
     }
   }
-  
+
+  export let onInternalNavigate = (path) => {
+    if (typeof window !== 'undefined' && path) {
+      window.location.assign(path)
+    }
+  }
+
   const toolLinks = [
+    {
+      name: '图片转换',
+      icon: 'fa-solid fa-arrow-right-arrow-left',
+      route: '/convert/'
+    },
+    {
+      name: '赞赏支持',
+      icon: 'fa-solid fa-heart',
+      route: '/sponsors/'
+    },
+    {
+      name: 'Markdown',
+      icon: 'fa-brands fa-markdown',
+      route: '/md/'
+    },
+    {
+      name: '随机抽签',
+      icon: 'fa-solid fa-dice',
+      route: '/lottery/'
+    },
+    {
+      name: '文本加密',
+      icon: 'fa-solid fa-lock',
+      route: '/cipher/'
+    },
     {
       name: '博客',
       icon: 'fa-solid fa-blog',
@@ -37,7 +68,7 @@
         <button
           type="button"
           class="tool-button"
-          onclick={() => onNavigate(link)}
+          onclick={() => (link.route ? onInternalNavigate(link.route) : onNavigate(link))}
           aria-label={`打开 ${link.name}`}
         >
           <i class={link.icon}></i>

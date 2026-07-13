@@ -12,8 +12,16 @@
   import ClockWidget from './components/ClockWidget.svelte'
   import NoticeBoard from './components/NoticeBoard.svelte'
   import CalendarWidget from './components/CalendarWidget.svelte'
+  import WeatherWidget from './components/WeatherWidget.svelte'
+  import SayingWidget from './components/SayingWidget.svelte'
+  import CardStack from './components/CardStack.svelte'
   import TodoWidget from './components/TodoWidget.svelte'
   import CookieConsent from './components/CookieConsent.svelte'
+  import ImageConvert from './components/ImageConvert.svelte'
+  import Sponsors from './components/Sponsors.svelte'
+  import MarkDownPreview from './components/MarkdownPreview.svelte'
+  import Lottery from './components/Lottery.svelte'
+  import Cipher from './components/Cipher.svelte'
   import { getCookie, setCookie } from './lib/cookie.js'
   import config from './data/config.js'
 
@@ -37,6 +45,40 @@
   let linkTransitionEnabled = $state(config.linkTransition.enabled ?? true)
   const linkTransitionDelayMs = config.linkTransition.delayMs ?? 1000
   const linkTransitionParticleCount = config.linkTransition.particleCount ?? 24
+
+  // 轻量 SPA 路由：根据 pathname 切换页面（支持 /convert/ 等子路径）
+  function getRoute() {
+    if (typeof window === 'undefined') return '/'
+    const p = window.location.pathname
+    return p.length > 1 && p.endsWith('/') ? p.slice(0, -1) : p
+  }
+
+  let route = $state(getRoute())
+
+  function navigate(path) {
+    if (typeof window === 'undefined') return
+    if (window.location.pathname !== path) {
+      window.history.pushState({ path }, '', path)
+    }
+    route = getRoute()
+    window.scrollTo(0, 0)
+  }
+
+  function handlePopState() {
+    route = getRoute()
+  }
+
+  // 右侧栏堆叠卡片组（数据驱动，可扩展）：默认 日历卡 + 天气卡
+  const sidebarCards = [
+    { component: CalendarWidget },
+    { component: WeatherWidget }
+  ]
+
+  // 左侧时间区堆叠卡片组：时钟卡 + 一言卡
+  const clockStackCards = [
+    { component: ClockWidget },
+    { component: SayingWidget }
+  ]
 
   function setEffectMode(mode) {
     effectMode = mode
@@ -133,11 +175,15 @@
   import { onMount, onDestroy } from 'svelte'
   onMount(() => {
     loadSettings()
+    window.addEventListener('popstate', handlePopState)
   })
 
   onDestroy(() => {
     if (linkTransitionTimer) {
       clearTimeout(linkTransitionTimer)
+    }
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('popstate', handlePopState)
     }
   })
 </script>
@@ -151,11 +197,22 @@
   <div class="bg-overlay" class:hidden={isDarkMode}></div>
   <CookieConsent />
 
+  {#if route === '/convert'}
+    <ImageConvert onBack={() => navigate('/')} />
+  {:else if route === '/sponsors'}
+    <Sponsors onBack={() => navigate('/')} />
+  {:else if route === '/md'}
+    <MarkDownPreview onBack={() => navigate('/')} />
+  {:else if route === '/lottery'}
+    <Lottery onBack={() => navigate('/')} />
+  {:else if route === '/cipher'}
+    <Cipher onBack={() => navigate('/')} />
+  {:else}
   <main>
     <div class="content-wrapper">
       <div class="side-panel left-panel">
         {#if showClock}
-          <ClockWidget />
+          <CardStack cards={clockStackCards} />
         {/if}
         {#if showNotice}
           <NoticeBoard />
@@ -189,7 +246,7 @@
             <SocialButtons onNavigate={handleExternalNavigate} />
           </div>
           <div class="entrance-item" style="animation-delay: 240ms">
-            <ToolButtons onNavigate={handleExternalNavigate} />
+            <ToolButtons onNavigate={handleExternalNavigate} onInternalNavigate={navigate} />
           </div>
           <div class="entrance-item" style="animation-delay: 400ms">
             <Timeline />
@@ -203,7 +260,7 @@
 
       <div class="side-panel right-panel">
         {#if showCalendar}
-          <CalendarWidget />
+          <CardStack cards={sidebarCards} />
         {/if}
         {#if showTodo}
           <TodoWidget />
@@ -223,6 +280,7 @@
 
   {#if musicVisible}
     <MusicPlayer />
+  {/if}
   {/if}
 
   <footer class="footer">
@@ -244,6 +302,35 @@
                  'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ---- 自定义滚动条：与暗色玻璃拟态风格一致 ---- */
+  /* Firefox */
+  :global(*) {
+    scrollbar-width: thin;
+    scrollbar-color: #3a3a3a rgba(26, 26, 26, 0.45);
+  }
+  /* WebKit (Chrome / Edge / Safari) */
+  :global(*::-webkit-scrollbar) {
+    width: 10px;
+    height: 10px;
+  }
+  :global(*::-webkit-scrollbar-track) {
+    background: rgba(26, 26, 26, 0.45);
+    border-radius: 8px;
+  }
+  :global(*::-webkit-scrollbar-thumb) {
+    background-color: #3a3a3a;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    border-radius: 8px;
+    transition: background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  :global(*::-webkit-scrollbar-thumb:hover) {
+    background-color: #6ee7a8;
+  }
+  :global(*::-webkit-scrollbar-corner) {
+    background: transparent;
   }
 
   :global(.skeleton) {
@@ -347,11 +434,18 @@
 
   .footer {
     text-align: center;
-    padding: 30px 20px 40px;
+    padding: 30px 20px 100px;
     color: #555555;
     font-size: 13px;
     position: relative;
     z-index: 2;
+  }
+
+  @media (max-width: 1200px) {
+    /* 窄屏（≤1200px）隐藏左右侧栏卡片堆叠，避免遮挡中间内容 */
+    .side-panel {
+      display: none;
+    }
   }
 
   @media (max-width: 768px) {
@@ -364,7 +458,7 @@
     }
 
     .footer {
-      padding: 24px 16px 30px;
+      padding: 24px 16px 120px;
       font-size: 12px;
     }
   }
