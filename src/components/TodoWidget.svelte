@@ -47,20 +47,15 @@
   .todo-widget {
     width: 260px;
     padding: 18px;
-    background-color: rgba(26, 26, 26, 0.45);
+    background-color: #1a1a1a;
     border: 1px solid #2a2a2a;
     border-radius: 16px;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
     opacity: 0;
-    transform: translateX(16px);
-    transition: opacity 0.6s ease, transform 0.6s ease;
-    margin-top: 24px;
+    transition: opacity 0.6s ease;
   }
   
   .todo-widget.mounted {
     opacity: 1;
-    transform: translateX(0);
   }
   
   .todo-header {

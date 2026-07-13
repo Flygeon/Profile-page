@@ -28,15 +28,18 @@
     return calendar
   }
   
-  function prevMonth() {
+  function prevMonth(e) {
+    e?.stopPropagation?.()
     currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)
   }
   
-  function nextMonth() {
+  function nextMonth(e) {
+    e?.stopPropagation?.()
     currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)
   }
   
-  function goToToday() {
+  function goToToday(e) {
+    e?.stopPropagation?.()
     currentDate = new Date()
   }
   
@@ -54,13 +57,13 @@
 <div class="calendar-widget" class:mounted>
   {#if mounted}
     <div class="calendar-header">
-      <button class="nav-btn" onclick={prevMonth} aria-label="上一月">
+      <button class="nav-btn" onclick={prevMonth} onkeydown={(e) => e.stopPropagation()} aria-label="上一月">
         <i class="fa-solid fa-chevron-left"></i>
       </button>
-      <button class="calendar-title" onclick={goToToday} aria-label="回到今天">
+      <button class="calendar-title" onclick={goToToday} onkeydown={(e) => e.stopPropagation()} aria-label="回到今天">
         {currentYear}年{currentMonth}月
       </button>
-      <button class="nav-btn" onclick={nextMonth} aria-label="下一月">
+      <button class="nav-btn" onclick={nextMonth} onkeydown={(e) => e.stopPropagation()} aria-label="下一月">
         <i class="fa-solid fa-chevron-right"></i>
       </button>
     </div>
@@ -107,13 +110,11 @@
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     opacity: 0;
-    transform: translateX(16px);
-    transition: opacity 0.6s ease, transform 0.6s ease;
+    transition: opacity 0.6s ease;
   }
   
   .calendar-widget.mounted {
     opacity: 1;
-    transform: translateX(0);
   }
   
   .calendar-header {
