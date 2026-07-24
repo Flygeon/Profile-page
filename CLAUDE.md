@@ -75,3 +75,6 @@ App.svelte — 协调全局状态、设置持久化、特效切换、音乐播�
 - **过渡**：模态框和遮罩层中使用 `svelte/transition` 的 `fade`、`fly`。
 - **CSS**：每个组件通过 `<style>` 标签实现作用域样式。暗色主题使用 `#0a0a0a` 背景。卡片使用 `rgba(26,26,26,0.55)` 配合 `backdrop-filter: blur()`。
 - **动画**：使用 CSS `@keyframes` 结合 `--i` 自定义属性实现交错入场动画。
+
+### 注意事项
+1.后续输出中不需要使用npm run build进行构建。
