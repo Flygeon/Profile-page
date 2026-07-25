@@ -33,6 +33,8 @@ import {
   SkipForward,
   ListMusic,
   Captions,
+  Menu,
+  X,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -105,6 +107,7 @@ export default function HomePage() {
   const [musicMenuView, setMusicMenuView] = useState<'lyrics' | 'playlist'>('lyrics')
   const [showBilingual, setShowBilingual] = useState(true)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const musicPlayerRef = useRef<MusicPlayerHandle>(null)
   const lyricScrollRef = useRef<HTMLDivElement>(null)
   const [musicState, setMusicState] = useState<MusicPlayerState>({
@@ -185,7 +188,10 @@ export default function HomePage() {
             animate={{ opacity: 1, x: 0 }}
             className="flex items-center gap-2.5"
           >
-            <div className="relative w-8 h-8 rounded-sm overflow-hidden ring-1 ring-white/20">
+            <div
+              className="relative w-8 h-8 rounded-sm overflow-hidden ring-1 ring-white/20 cursor-pointer"
+              onDoubleClick={() => window.open('https://www.bilibili.com/video/BV1n3qqBcEZn', '_blank')}
+            >
               <Image
                 src="/avatar.webp"
                 alt="Avatar"
@@ -469,8 +475,199 @@ export default function HomePage() {
               <span>设置</span>
             </Button>
           </motion.nav>
+
+          {/* 移动端菜单按钮 */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="sm:hidden h-8 px-3 text-[#9ca3af] hover:text-white"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </Button>
         </div>
       </header>
+
+      {/* 移动端侧边栏菜单 */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 z-50 sm:hidden"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="fixed right-0 top-0 bottom-0 w-64 bg-[#111111]/95 backdrop-blur-xl border-l border-white/[0.06] z-50 sm:hidden flex flex-col"
+            >
+              <div className="p-4 border-b border-white/[0.06]">
+                <div className="flex items-center gap-2.5">
+                  <div className="relative w-8 h-8 rounded-sm overflow-hidden ring-1 ring-white/20">
+                    <Image
+                      src="/avatar.webp"
+                      alt="Avatar"
+                      width={32}
+                      height={32}
+                      className="object-cover"
+                    />
+                  </div>
+                  <span className="text-sm font-semibold text-white">flygeon</span>
+                </div>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                {/* 导航链接 */}
+                {navItems.map((item) => (
+                  <Button
+                    key={item.name}
+                    variant="ghost"
+                    className="w-full justify-start text-left px-3 py-2.5 text-sm text-[#9ca3af] hover:text-white hover:bg-white/[0.06]"
+                    onClick={() => {
+                      handleNavigate(item.href, item.name, item.external)
+                      setMobileMenuOpen(false)
+                    }}
+                  >
+                    {item.icon}
+                    <span className="ml-2">{item.name}</span>
+                  </Button>
+                ))}
+
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-left px-3 py-2.5 text-sm text-[#9ca3af] hover:text-white hover:bg-white/[0.06]"
+                  onClick={() => {
+                    router.push('/sponsors')
+                    setMobileMenuOpen(false)
+                  }}
+                >
+                  <Heart className="w-4 h-4" />
+                  <span className="ml-2">赞助</span>
+                </Button>
+
+                <div className="border-t border-white/[0.06] my-3" />
+
+                {/* 工具链接 */}
+                {toolItems.map((item) => (
+                  <Button
+                    key={item.name}
+                    variant="ghost"
+                    className="w-full justify-start text-left px-3 py-2.5 text-sm text-[#9ca3af] hover:text-white hover:bg-white/[0.06]"
+                    onClick={() => {
+                      router.push(item.href)
+                      setMobileMenuOpen(false)
+                    }}
+                  >
+                    {item.icon}
+                    <span className="ml-2">{item.name}</span>
+                  </Button>
+                ))}
+
+                <div className="border-t border-white/[0.06] my-3" />
+
+                {/* 音乐播放模块 */}
+                <div className="px-2">
+                  <div className="text-[10px] tracking-[0.2em] text-white/30 uppercase mb-3 font-mono">// Music</div>
+                  <div className="bg-[#151515]/80 border border-white/[0.08] rounded-none p-3">
+                    {musicState.songs.length > 0 ? (
+                      <div className="space-y-3">
+                        {/* 当前歌曲信息 */}
+                        <div className="flex gap-3">
+                          <div className="relative w-12 h-12 rounded-sm overflow-hidden flex-shrink-0">
+                            <Image
+                              src={currentNavSong.cover}
+                              alt={currentNavSong.title}
+                              width={48}
+                              height={48}
+                              className="object-cover"
+                            />
+                            {musicState.isPlaying && (
+                              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                <motion.div
+                                  animate={{ rotate: 360 }}
+                                  transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+                                  className="w-5 h-5 border-2 border-white/60 border-t-transparent rounded-full"
+                                />
+                              </div>
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1 flex flex-col justify-center">
+                            <span className="text-sm font-medium text-white truncate">{currentNavSong.title}</span>
+                            <span className="text-xs text-gray-400 truncate">{currentNavSong.artist}</span>
+                          </div>
+                        </div>
+
+                        {/* 进度条 */}
+                        <div className="h-0.5 bg-white/[0.08] cursor-pointer">
+                          <div
+                            className="h-full bg-neon-green transition-all"
+                            style={{ width: `${musicState.progress}%` }}
+                          />
+                        </div>
+
+                        {/* 控制按钮 */}
+                        <div className="flex items-center justify-center gap-6">
+                          <button
+                            onClick={() => musicPlayerRef.current?.playPrev()}
+                            className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+                          >
+                            <SkipBack className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => musicPlayerRef.current?.togglePlay()}
+                            className="w-10 h-10 flex items-center justify-center rounded-sm bg-neon-green/15 text-neon-green border border-neon-green/40 hover:bg-neon-green/25 transition-all"
+                          >
+                            {musicState.isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 fill-current" />}
+                          </button>
+                          <button
+                            onClick={() => musicPlayerRef.current?.playNext()}
+                            className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+                          >
+                            <SkipForward className="w-4 h-4" />
+                          </button>
+                        </div>
+
+                        {/* 当前歌词 */}
+                        {musicState.currentLyricLine && (
+                          <div className="text-center">
+                            <p className="text-xs text-gray-500 truncate">
+                              {musicState.currentLyricLine.original || musicState.currentLyricLine.text}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="text-center py-4">
+                        <p className="text-xs text-gray-500">加载中…</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="border-t border-white/[0.06] my-3" />
+
+                {/* 设置 */}
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-left px-3 py-2.5 text-sm text-[#9ca3af] hover:text-white hover:bg-white/[0.06]"
+                  onClick={() => {
+                    setSettingsOpen(true)
+                    setMobileMenuOpen(false)
+                  }}
+                >
+                  <Settings className="w-4 h-4" />
+                  <span className="ml-2">设置</span>
+                </Button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       <CookieConsent />
 

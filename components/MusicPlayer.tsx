@@ -533,6 +533,7 @@ const MusicPlayer = forwardRef<MusicPlayerHandle, MusicPlayerProps>(function Mus
         animate={{ opacity: 1, x: 0 }}
         className="fixed right-0 bottom-28 z-40"
       >
+        {/* 桌面端：支持长按展开音乐菜单 */}
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -548,7 +549,18 @@ const MusicPlayer = forwardRef<MusicPlayerHandle, MusicPlayerProps>(function Mus
           onTouchEnd={endPress}
           title="单击回到顶部 / 双击下一首 / 长按展开音乐"
           aria-label="单击回到顶部 / 双击下一首 / 长按展开音乐"
-          className={`${btnSize} rounded-l-sm ${btnClass} text-gray-400 hover:text-white hover:border-white/30`}
+          className={`hidden sm:block ${btnSize} rounded-l-sm ${btnClass} text-gray-400 hover:text-white hover:border-white/30`}
+        >
+          <i className="fa-solid fa-arrow-up text-sm"></i>
+        </motion.button>
+
+        {/* 移动端：仅返回顶部功能 */}
+        <motion.button
+          whileTap={{ scale: 0.95 }}
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          title="返回顶部"
+          aria-label="返回顶部"
+          className={`sm:hidden ${btnSize} rounded-l-sm ${btnClass} text-gray-400 hover:text-white hover:border-white/30`}
         >
           <i className="fa-solid fa-arrow-up text-sm"></i>
         </motion.button>
