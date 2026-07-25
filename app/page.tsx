@@ -74,7 +74,7 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { name: '博客', href: 'https://flygeon.top', icon: <BookOpen className="w-3.5 h-3.5" />, external: true },
+  { name: '博客', href: '/posts', icon: <BookOpen className="w-3.5 h-3.5" /> },
   { name: '追番', href: 'https://flygeon.top/bangumi/', icon: <Tv className="w-3.5 h-3.5" />, external: true },
   { name: '友链', href: 'https://flygeon.top/friends/', icon: <Link2 className="w-3.5 h-3.5" />, external: true },
 ]
@@ -87,10 +87,10 @@ const toolItems = [
 ]
 
 const exploreItems = [
-  { name: '技术博客', description: '阅读技术记录、开发笔记和近期文章', href: 'https://flygeon.top', icon: BookOpen },
-  { name: '追番记录', description: '查看正在追看与已经完成的动画作品', href: 'https://flygeon.top/bangumi/', icon: Tv },
-  { name: '友情链接', description: '发现更多有趣的个人站点与创作者', href: 'https://flygeon.top/friends/', icon: Link2 },
-  { name: 'GitHub', description: '查看开源项目、代码仓库与开发动态', href: 'https://github.com/Flygeon', icon: Code2 },
+  { name: '技术博客', description: '阅读技术记录、开发笔记和近期文章', href: '/posts', icon: BookOpen, external: false },
+  { name: '追番记录', description: '查看正在追看与已经完成的动画作品', href: 'https://flygeon.top/bangumi/', icon: Tv, external: true },
+  { name: '友情链接', description: '发现更多有趣的个人站点与创作者', href: 'https://flygeon.top/friends/', icon: Link2, external: true },
+  { name: 'GitHub', description: '查看开源项目、代码仓库与开发动态', href: 'https://github.com/Flygeon', icon: Code2, external: true },
 ]
 
 const tags = ['技术博客','实用在线工具集']
@@ -788,7 +788,7 @@ export default function HomePage() {
               <Button
                 size="lg"
                 className="bg-gradient-to-r from-white to-neutral-300 hover:from-neutral-100 hover:to-neutral-200 text-black border-0 gap-2 px-5 h-10 text-sm neon-glow transition-all"
-                onClick={() => handleNavigate('https://flygeon.top', '技术博客', true)}
+                onClick={() => router.push('/posts')}
               >
                 <BookOpen className="w-4 h-4" />
                 阅读博客
@@ -892,7 +892,7 @@ export default function HomePage() {
                 return (
                   <button
                     key={item.name}
-                    onClick={() => handleNavigate(item.href, item.name, true)}
+                    onClick={() => handleNavigate(item.href, item.name, item.external)}
                     className="group min-h-44 border border-white/[0.08] bg-[#0d0d0d]/75 p-5 text-left flex flex-col justify-between hover:border-white/20 hover:bg-[#151515]/90 transition-all duration-300"
                   >
                     <div className="flex items-start justify-between">
