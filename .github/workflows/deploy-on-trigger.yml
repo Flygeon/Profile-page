@@ -1,0 +1,32 @@
+name: Deploy on Astro Update
+on:
+  repository_dispatch:
+    types: [astro-updated]  # 监听来自 Astro 仓库的信号
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout profiles repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build profiles site
+        run: npm run build
+
+      - name: Deploy profiles site
+        run: |
+          echo "🔄 检测到 Astro 仓库更新，开始部署 profiles..."
+          # 在这里添加您的实际部署命令
+          # 例如：
+          # - 部署到服务器：rsync -avz dist/ user@server:/path/to/website
+          # - 部署到 Vercel：npx vercel --prod --token ${{ secrets.VERCEL_TOKEN }}
+          # - 部署到 Netlify：npx netlify deploy --prod --auth ${{ secrets.NETLIFY_TOKEN }}
+          echo "✅ Profiles 站点部署完成"
