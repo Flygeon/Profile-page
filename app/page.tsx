@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
@@ -22,8 +22,20 @@ import {
   FileText,
   Dice5,
   Lock,
+  ArrowUpRight,
+  Code2,
+  Music2,
+  Cpu,
+  Sparkles,
+  Play,
+  Pause,
+  SkipBack,
+  SkipForward,
+  ListMusic,
+  Captions,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -38,7 +50,7 @@ import CookieConsent from '@/components/CookieConsent'
 import LinkTransitionOverlay from '@/components/LinkTransitionOverlay'
 import BioSection from '@/components/BioSection'
 import Timeline from '@/components/Timeline'
-import MusicPlayer from '@/components/MusicPlayer'
+import MusicPlayer, { MusicPlayerHandle, MusicPlayerState } from '@/components/MusicPlayer'
 import ClockWidget from '@/components/ClockWidget'
 import CalendarWidget from '@/components/CalendarWidget'
 import TodoWidget from '@/components/TodoWidget'
@@ -66,10 +78,17 @@ const navItems: NavItem[] = [
 ]
 
 const toolItems = [
-  { name: '图片转换', icon: <ImageIcon className="w-4 h-4" />, href: '/convert' },
-  { name: 'Markdown预览', icon: <FileText className="w-4 h-4" />, href: '/md' },
-  { name: '随机抽签', icon: <Dice5 className="w-4 h-4" />, href: '/lottery' },
-  { name: '文本加解密', icon: <Lock className="w-4 h-4" />, href: '/cipher' },
+  { name: '图片转换', description: '粘贴或上传图片，在 PNG、JPG 与 WebP 之间快速转换。', icon: <ImageIcon className="w-4 h-4" />, href: '/convert' },
+  { name: 'Markdown预览', description: '使用示例文档、分屏编辑与实时预览完成内容排版。', icon: <FileText className="w-4 h-4" />, href: '/md' },
+  { name: '随机抽签', description: '从预设场景或自定义选项中随机抽取一个结果。', icon: <Dice5 className="w-4 h-4" />, href: '/lottery' },
+  { name: '文本加解密', description: '提供口令加密、Base64 与兽音译者三种处理方式。', icon: <Lock className="w-4 h-4" />, href: '/cipher' },
+]
+
+const exploreItems = [
+  { name: '技术博客', description: '阅读技术记录、开发笔记和近期文章', href: 'https://flygeon.top', icon: BookOpen },
+  { name: '追番记录', description: '查看正在追看与已经完成的动画作品', href: 'https://flygeon.top/bangumi/', icon: Tv },
+  { name: '友情链接', description: '发现更多有趣的个人站点与创作者', href: 'https://flygeon.top/friends/', icon: Link2 },
+  { name: 'GitHub', description: '查看开源项目、代码仓库与开发动态', href: 'https://github.com/Flygeon', icon: Code2 },
 ]
 
 const tags = ['技术博客','实用在线工具集']
@@ -82,7 +101,38 @@ export default function HomePage() {
   const [linkTransitionHost, setLinkTransitionHost] = useState('')
   const [linkTransitionUrl, setLinkTransitionUrl] = useState('')
   const [toolsOpen, setToolsOpen] = useState(false)
+  const [musicOpen, setMusicOpen] = useState(false)
+  const [musicMenuView, setMusicMenuView] = useState<'lyrics' | 'playlist'>('lyrics')
+  const [showBilingual, setShowBilingual] = useState(true)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const musicPlayerRef = useRef<MusicPlayerHandle>(null)
+  const lyricScrollRef = useRef<HTMLDivElement>(null)
+  const [musicState, setMusicState] = useState<MusicPlayerState>({
+    currentIndex: 0,
+    isPlaying: false,
+    progress: 0,
+    currentTime: 0,
+    songs: [],
+    lyrics: [],
+    currentLyricIndex: -1,
+    currentLyric: '歌单加载中…',
+    currentLyricLine: null,
+    loading: true,
+  })
+  const handleMusicStateChange = useCallback((state: MusicPlayerState) => {
+    setMusicState(state)
+  }, [])
+  const currentNavSong = musicState.songs[musicState.currentIndex] ?? {
+    title: '歌单加载中…',
+    artist: 'Meting API',
+    cover: config.music[0].cover,
+  }
+
+  useEffect(() => {
+    if (!musicOpen || musicMenuView !== 'lyrics') return
+    const activeLine = lyricScrollRef.current?.querySelector('[data-active="true"]')
+    activeLine?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+  }, [musicMenuView, musicOpen, musicState.currentLyricIndex])
 
   // 深色模式：切换 html 上的 light 类
   useEffect(() => {
@@ -147,6 +197,20 @@ export default function HomePage() {
             <span className="text-sm font-semibold text-white tracking-tight">flygeon</span>
           </motion.div>
 
+          {/* 导航栏歌词显示 */}
+          <div className="hidden md:flex flex-1 justify-center px-4">
+            {musicState.isPlaying && musicState.currentLyricLine && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="text-xs text-gray-400 truncate max-w-md"
+              >
+                {musicState.currentLyricLine.original || musicState.currentLyricLine.text}
+              </motion.div>
+            )}
+          </div>
+
           {/* 导航 */}
           <motion.nav
             initial={{ opacity: 0, x: 20 }}
@@ -180,6 +244,176 @@ export default function HomePage() {
               <Heart className="w-3.5 h-3.5" />
               <span>赞助</span>
             </Button>
+
+            <div
+              className="relative"
+              onMouseEnter={() => setMusicOpen(true)}
+              onMouseLeave={() => setMusicOpen(false)}
+            >
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 px-3 text-[#9ca3af] hover:text-white hover:bg-white/[0.06] gap-1.5 text-xs"
+                onClick={() => setMusicOpen((value) => !value)}
+              >
+                <Music2 className="w-3.5 h-3.5" />
+                <span>音乐</span>
+                <ChevronDown className={`w-3 h-3 opacity-60 transition-transform ${musicOpen ? 'rotate-180' : ''}`} />
+              </Button>
+              <AnimatePresence>
+                {musicOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 top-full mt-1 w-72 bg-[#111111]/95 border border-white/[0.08] backdrop-blur-xl overflow-hidden"
+                  >
+                    <div className="flex items-center gap-3 p-3 border-b border-white/[0.06]">
+                      <Image
+                        src={currentNavSong.cover}
+                        alt={currentNavSong.title}
+                        width={40}
+                        height={40}
+                        className="w-10 h-10 object-cover rounded-sm shrink-0"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <div className="text-xs font-medium text-white truncate">{currentNavSong.title}</div>
+                        <div className="text-[10px] text-[#737373] truncate mt-1">{currentNavSong.artist}</div>
+                      </div>
+                      <div className="flex items-center gap-0.5">
+                        <button
+                          onClick={() => musicPlayerRef.current?.playPrev()}
+                          className="w-7 h-7 flex items-center justify-center text-[#737373] hover:text-white hover:bg-white/[0.06] transition-colors"
+                          aria-label="上一首"
+                        >
+                          <SkipBack className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => musicPlayerRef.current?.togglePlay()}
+                          className="w-8 h-8 flex items-center justify-center bg-white text-black hover:bg-neutral-200 transition-colors"
+                          aria-label={musicState.isPlaying ? '暂停' : '播放'}
+                        >
+                          {musicState.isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-current" />}
+                        </button>
+                        <button
+                          onClick={() => musicPlayerRef.current?.playNext()}
+                          className="w-7 h-7 flex items-center justify-center text-[#737373] hover:text-white hover:bg-white/[0.06] transition-colors"
+                          aria-label="下一首"
+                        >
+                          <SkipForward className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="h-px bg-white/[0.06]">
+                      <div className="h-full bg-white" style={{ width: `${musicState.progress}%` }} />
+                    </div>
+                    <div className="flex border-b border-white/[0.06]">
+                      <button
+                        onClick={() => setMusicMenuView('lyrics')}
+                        className={`flex-1 h-8 flex items-center justify-center gap-1.5 text-[10px] transition-colors ${musicMenuView === 'lyrics' ? 'text-white bg-white/[0.06]' : 'text-[#666] hover:text-white'}`}
+                      >
+                        <Captions className="w-3 h-3" />
+                        滚动歌词
+                      </button>
+                      <button
+                        onClick={() => setMusicMenuView('playlist')}
+                        className={`flex-1 h-8 flex items-center justify-center gap-1.5 text-[10px] transition-colors ${musicMenuView === 'playlist' ? 'text-white bg-white/[0.06]' : 'text-[#666] hover:text-white'}`}
+                      >
+                        <ListMusic className="w-3 h-3" />
+                        播放列表
+                      </button>
+                      {musicMenuView === 'lyrics' && (
+                        <button
+                          onClick={() => setShowBilingual(!showBilingual)}
+                          className={`h-8 px-3 text-[10px] transition-colors ${showBilingual ? 'text-white bg-white/[0.06]' : 'text-[#666] hover:text-white'}`}
+                          aria-label={showBilingual ? "仅显示原文" : "显示双语"}
+                        >
+                          {showBilingual ? "双语" : "原文"}
+                        </button>
+                      )}
+                    </div>
+                    <AnimatePresence mode="wait" initial={false}>
+                      {musicMenuView === 'lyrics' ? (
+                        <motion.div
+                          key="lyrics"
+                          ref={lyricScrollRef}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="h-52 overflow-y-auto py-20 px-4 text-center scroll-smooth"
+                        >
+                          {musicState.lyrics.length ? musicState.lyrics.map((line, index) => (
+                            <div
+                              key={`${line.time}-${index}`}
+                              className="py-1 cursor-pointer"
+                              onClick={() => musicPlayerRef.current?.seekToTime(line.time)}
+                            >
+                              <button
+                                data-active={index === musicState.currentLyricIndex}
+                                className={`block w-full text-xs leading-5 transition-all duration-300 ${
+                                  index === musicState.currentLyricIndex
+                                    ? 'text-white scale-105 font-medium'
+                                    : 'text-[#555] hover:text-[#999]'
+                                }`}
+                              >
+                                {line.original || line.text}
+                              </button>
+                              {showBilingual && line.translation && (
+                                <button
+                                  className={`block w-full text-[10px] text-gray-500 leading-4 ${
+                                    index === musicState.currentLyricIndex ? 'scale-105 text-gray-400' : ''
+                                  }`}
+                                >
+                                  {line.translation}
+                                </button>
+                              )}
+                            </div>
+                          )) : (
+                            <div className="text-xs text-[#555]">{musicState.loading ? '正在加载歌词…' : '暂无歌词'}</div>
+                          )}
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="playlist"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="max-h-52 overflow-y-auto py-1"
+                        >
+                          {musicState.songs.map((song, index) => (
+                            <button
+                              key={song.id}
+                              onClick={() => musicPlayerRef.current?.selectSong(index)}
+                              className={`w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors ${
+                                index === musicState.currentIndex
+                                  ? 'bg-white/[0.08] text-white'
+                                  : 'text-[#737373] hover:text-white hover:bg-white/[0.05]'
+                              }`}
+                            >
+                              <span className="w-5 text-center text-[10px] tabular-nums">{String(index + 1).padStart(2, '0')}</span>
+                              <span className="min-w-0 flex-1 text-xs truncate">{song.title}</span>
+                              {index === musicState.currentIndex && musicState.isPlaying && (
+                                <span className="flex items-end gap-0.5 h-3" aria-label="正在播放">
+                                  {[8, 12, 6].map((height, barIndex) => (
+                                    <motion.span
+                                      key={barIndex}
+                                      animate={{ height: [3, height, 3] }}
+                                      transition={{ duration: 0.7, repeat: Infinity, delay: barIndex * 0.12 }}
+                                      className="w-0.5 bg-white"
+                                    />
+                                  ))}
+                                </span>
+                              )}
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
             {/* 工具：可展开二级列表 */}
             <div
@@ -357,7 +591,7 @@ export default function HomePage() {
               <Button
                 size="lg"
                 className="bg-gradient-to-r from-white to-neutral-300 hover:from-neutral-100 hover:to-neutral-200 text-black border-0 gap-2 px-5 h-10 text-sm neon-glow transition-all"
-                onClick={() => router.push('/convert')}
+                onClick={() => handleNavigate('https://flygeon.top', '技术博客', true)}
               >
                 <BookOpen className="w-4 h-4" />
                 阅读博客
@@ -401,6 +635,132 @@ export default function HomePage() {
 
       {/* 内容板块 */}
       <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 space-y-20">
+        <ScrollReveal>
+          <div id="tools" className="scroll-mt-24">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-8">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="w-1 h-6 rounded-full bg-gradient-to-b from-white to-neutral-500" />
+                  <h2 className="text-2xl font-bold text-white tracking-tight">在线工具箱</h2>
+                </div>
+                <p className="text-sm text-[#737373] pl-4">所有处理均在浏览器内完成，打开即可使用。</p>
+              </div>
+              <span className="text-[11px] uppercase tracking-[0.22em] text-[#525252]">4 Tools Available</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {toolItems.map((item, index) => (
+                <motion.button
+                  key={item.name}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.25 }}
+                  transition={{ delay: index * 0.06 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => router.push(item.href)}
+                  className="group text-left"
+                >
+                  <Card className="h-full rounded-none border-white/[0.08] bg-[#101010]/80 hover:border-white/20 hover:bg-[#151515]/90 transition-all duration-300">
+                    <CardContent className="p-5 flex items-start gap-4">
+                      <div className="w-11 h-11 shrink-0 border border-white/[0.09] bg-white/[0.04] text-[#d4d4d4] flex items-center justify-center group-hover:bg-white group-hover:text-black transition-colors duration-300">
+                        {item.icon}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-3 mb-1.5">
+                          <h3 className="text-sm font-semibold text-white">{item.name}</h3>
+                          <ArrowUpRight className="w-4 h-4 text-[#525252] group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                        </div>
+                        <p className="text-xs leading-5 text-[#737373] group-hover:text-[#a3a3a3] transition-colors">
+                          {item.description}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.button>
+              ))}
+            </div>
+          </div>
+        </ScrollReveal>
+
+        <ScrollReveal>
+          <div>
+            <div className="flex items-center gap-3 mb-8">
+              <span className="w-1 h-6 rounded-full bg-gradient-to-b from-white to-neutral-500" />
+              <h2 className="text-2xl font-bold text-white tracking-tight">探索站点</h2>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {exploreItems.map((item) => {
+                const Icon = item.icon
+                return (
+                  <button
+                    key={item.name}
+                    onClick={() => handleNavigate(item.href, item.name, true)}
+                    className="group min-h-44 border border-white/[0.08] bg-[#0d0d0d]/75 p-5 text-left flex flex-col justify-between hover:border-white/20 hover:bg-[#151515]/90 transition-all duration-300"
+                  >
+                    <div className="flex items-start justify-between">
+                      <Icon className="w-5 h-5 text-[#737373] group-hover:text-white transition-colors" />
+                      <ArrowUpRight className="w-3.5 h-3.5 text-[#404040] group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-semibold text-white mb-2">{item.name}</h3>
+                      <p className="text-xs leading-5 text-[#737373]">{item.description}</p>
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </ScrollReveal>
+
+        <ScrollReveal>
+          <div className="grid grid-cols-1 lg:grid-cols-[1.35fr_0.65fr] gap-5">
+            <Card className="rounded-none border-white/[0.08] bg-[#101010]/80 overflow-hidden">
+              <CardContent className="p-6 sm:p-8">
+                <div className="flex items-center gap-2 text-xs text-[#737373] mb-5">
+                  <Sparkles className="w-4 h-4" />
+                  <span>当前站点</span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-bold text-white mb-3">一个持续生长的个人数字空间</h2>
+                <p className="max-w-2xl text-sm leading-7 text-[#8a8a8a]">
+                  这里集合了个人介绍、设备与技能记录、浏览器端实用工具、生活小部件和站点动态。内容会随着新的想法与项目继续扩展。
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-white/[0.06] mt-7 border border-white/[0.06]">
+                  {[
+                    { value: '4', label: '在线工具' },
+                    { value: '6', label: '实用部件' },
+                    { value: String(config.music.length), label: '音乐曲目' },
+                    { value: String(config.skills.categories.length), label: '技能分类' },
+                  ].map((item) => (
+                    <div key={item.label} className="bg-[#0d0d0d] px-4 py-4">
+                      <div className="text-xl font-semibold text-white">{item.value}</div>
+                      <div className="text-[11px] text-[#5f5f5f] mt-1">{item.label}</div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="rounded-none border-white/[0.08] bg-[#101010]/80">
+              <CardContent className="p-6 sm:p-8 h-full flex flex-col justify-between">
+                <div>
+                  <div className="w-10 h-10 border border-white/[0.09] bg-white/[0.04] flex items-center justify-center mb-5">
+                    <Music2 className="w-4 h-4 text-white" />
+                  </div>
+                  <h3 className="text-base font-semibold text-white mb-2">隐藏音乐控制</h3>
+                  <p className="text-xs leading-5 text-[#737373]">
+                    单击右侧按钮回到顶部，双击切换下一首，长按即可展开播放器。
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 mt-8 text-[11px] text-[#525252]">
+                  <Cpu className="w-3.5 h-3.5" />
+                  <span>桌面端与移动端均可使用</span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </ScrollReveal>
+
         {/* 关于我 */}
         <ScrollReveal>
           <div className="flex items-center gap-3 mb-8">
@@ -437,7 +797,9 @@ export default function HomePage() {
       </div>
 
       {/* 音乐播放器 */}
-      {settings.musicVisible && <MusicPlayer />}
+      {settings.musicVisible && (
+        <MusicPlayer ref={musicPlayerRef} onStateChange={handleMusicStateChange} />
+      )}
 
       {/* 页脚 */}
       <Footer />
