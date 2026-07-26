@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { Rss } from 'lucide-react'
+import { Github, QQ, Bilibili, ReactLogo } from '@/components/BrandIcons'
 
 const NAV = [
   { label: '博客', href: 'https://flygeon.top' },
@@ -10,10 +12,10 @@ const NAV = [
 ]
 
 const SOCIAL = [
-  { icon: 'fa-brands fa-github', href: 'https://github.com/Flygeon', label: 'GitHub' },
-  { icon: 'fa-brands fa-bilibili', href: 'https://space.bilibili.com/497846789', label: 'Bilibili' },
-  { icon: 'fa-brands fa-qq', href: 'https://im.qq.com', label: 'QQ' },
-  { icon: 'fa-solid fa-rss', href: 'https://flygeon.top/rss.xml', label: 'RSS' },
+  { icon: Github, href: 'https://github.com/Flygeon', label: 'GitHub' },
+  { icon: Bilibili, href: 'https://space.bilibili.com/497846789', label: 'Bilibili' },
+  { icon: QQ, href: 'https://im.qq.com', label: 'QQ' },
+  { icon: Rss, href: 'https://flygeon.top/rss.xml', label: 'RSS' },
 ]
 
 export default function Footer() {
@@ -75,18 +77,21 @@ export default function Footer() {
               {'>'} 立于浮华之世，奏响天籁之音
             </p>
             <div className="mt-5 flex gap-2">
-              {SOCIAL.map((s) => (
-                <a
-                  key={s.label}
-                  href={s.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label={s.label}
-                  className="group w-9 h-9 flex items-center justify-center border border-white/15 text-white/50 hover:text-black hover:bg-white hover:border-white transition-all duration-200"
-                >
-                  <i className={`${s.icon} text-sm`}></i>
-                </a>
-              ))}
+              {SOCIAL.map((s) => {
+                const Icon = s.icon
+                return (
+                  <a
+                    key={s.label}
+                    href={s.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={s.label}
+                    className="group w-9 h-9 flex items-center justify-center border border-white/15 text-white/50 hover:text-black hover:bg-white hover:border-white transition-all duration-200"
+                  >
+                    <Icon className="text-sm w-4 h-4" />
+                  </a>
+                )
+              })}
             </div>
           </div>
 
@@ -150,7 +155,7 @@ export default function Footer() {
           <span>© 2026 flygeon — All rights reserved.</span>
           <span className="flex items-center gap-2">
             <span className="tracking-widest">BUILT WITH</span>
-            <i className="fa-brands fa-react text-white/50"></i>
+            <ReactLogo className="text-white/50 w-4 h-4" />
             <span className="text-white/20">/</span>
             <span>NEXT.JS</span>
           </span>

@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type ComponentType } from 'react'
 import { motion } from 'framer-motion'
+import { CloudLightning, CloudRain, Snowflake, Cloud, CloudFog, Sun, CloudSun, TriangleAlert } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 
 interface WeatherAlert {
@@ -23,14 +24,14 @@ interface WeatherData {
   alerts?: WeatherAlert[]
 }
 
-// 天气现象 → Font Awesome 图标
-function weatherIcon(w: string): string {
-  if (w.includes('雷')) return 'fa-cloud-bolt'
-  if (w.includes('雨')) return 'fa-cloud-rain'
-  if (w.includes('雪')) return 'fa-snowflake'
-  if (w.includes('云') || w.includes('阴')) return 'fa-cloud'
-  if (w.includes('雾') || w.includes('霾')) return 'fa-smog'
-  return 'fa-sun'
+// 天气现象 → lucide 图标
+function weatherIcon(w: string): ComponentType<{ className?: string }> {
+  if (w.includes('雷')) return CloudLightning
+  if (w.includes('雨')) return CloudRain
+  if (w.includes('雪')) return Snowflake
+  if (w.includes('云') || w.includes('阴')) return Cloud
+  if (w.includes('雾') || w.includes('霾')) return CloudFog
+  return Sun
 }
 
 export default function WeatherWidget() {
@@ -64,7 +65,7 @@ export default function WeatherWidget() {
       <Card className="bg-dark-700/60 border-dark-600 w-full h-full">
         <CardContent className="p-4">
           <div className="flex items-center gap-2 mb-3">
-            <i className="fa-solid fa-cloud-sun text-neon-cyan"></i>
+            <CloudSun className="text-neon-cyan w-4 h-4" />
             <span className="text-xs text-gray-400">天气</span>
           </div>
 
@@ -84,7 +85,10 @@ export default function WeatherWidget() {
                   </span>
                   <span className="text-[10px] text-gray-500">{weather.report_time}</span>
                 </div>
-                <i className={`fa-solid ${weatherIcon(weather.weather)} text-2xl text-neon-orange`}></i>
+                {(() => {
+                  const WeatherIcon = weatherIcon(weather.weather)
+                  return <WeatherIcon className="text-2xl text-neon-orange w-6 h-6" />
+                })()}
               </div>
 
               <div className="text-3xl font-bold text-white mb-1">{weather.temperature}°</div>
@@ -105,7 +109,7 @@ export default function WeatherWidget() {
                 <div className="mt-3 pt-3 border-t border-dark-600 space-y-1.5">
                   {weather.alerts.map((a, i) => (
                     <div key={i} className="flex items-center gap-2 text-[11px]">
-                      <i className="fa-solid fa-triangle-exclamation text-neon-orange"></i>
+                      <TriangleAlert className="text-neon-orange w-4 h-4" />
                       <span className="text-gray-400 truncate">{a.title}</span>
                     </div>
                   ))}

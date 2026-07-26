@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Cookie } from 'lucide-react'
 import { setCookie, hasCookie } from '@/lib/cookie'
 
 export default function CookieConsent() {
@@ -34,7 +35,7 @@ export default function CookieConsent() {
         >
           <div className="glass-card p-4 px-6 flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <i className="fa-solid fa-cookie text-neon-orange"></i>
+              <Cookie className="text-neon-orange w-4 h-4" />
               <span className="text-sm text-gray-300">
                 本站使用 Cookie 来优化您的体验。
               </span>

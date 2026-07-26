@@ -3,6 +3,13 @@ import Link from 'next/link'
 import { ArrowLeft, ArrowUpRight, BookOpen } from 'lucide-react'
 import Footer from '@/components/Footer'
 import { Card, CardContent } from '@/components/ui/card'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: '博客',
+  description: 'flygeon 的博客文章列表。',
+  openGraph: { title: '博客 · flygeon', description: 'flygeon 的博客文章列表。' },
+}
 
 interface Post {
   title: string

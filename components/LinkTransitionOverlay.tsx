@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { ExternalLink } from 'lucide-react'
 
 interface LinkTransitionOverlayProps {
   open: boolean
@@ -128,7 +129,7 @@ export default function LinkTransitionOverlay({
               transition={{ type: 'spring', stiffness: 180, damping: 14 }}
               className="w-16 h-16 mx-auto mb-6 border border-white/30 bg-white/[0.03] flex items-center justify-center"
             >
-              <i className="fa-solid fa-arrow-up-right-from-square text-white text-xl"></i>
+              <ExternalLink className="text-white text-xl w-5 h-5" />
             </motion.div>
 
             <div className="text-[10px] tracking-[0.4em] text-white/40 uppercase mb-2">

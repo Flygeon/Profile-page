@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 
@@ -63,7 +64,7 @@ export default function CalendarWidget() {
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <i className="fa-solid fa-calendar text-neon-cyan"></i>
+              <Calendar className="text-neon-cyan w-4 h-4" />
               <span className="text-xs text-gray-400">日历</span>
             </div>
             <div className="flex gap-1">
@@ -73,7 +74,7 @@ export default function CalendarWidget() {
                 onClick={prevMonth}
                 className="text-gray-400 hover:text-white h-6 w-6"
               >
-                <i className="fa-solid fa-chevron-left text-xs"></i>
+                <ChevronLeft className="text-xs w-4 h-4" />
               </Button>
               <Button
                 variant="ghost"
@@ -81,7 +82,7 @@ export default function CalendarWidget() {
                 onClick={nextMonth}
                 className="text-gray-400 hover:text-white h-6 w-6"
               >
-                <i className="fa-solid fa-chevron-right text-xs"></i>
+                <ChevronRight className="text-xs w-4 h-4" />
               </Button>
             </div>
           </div>

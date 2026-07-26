@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { Clock } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 
 export default function ClockWidget() {
@@ -43,7 +44,7 @@ export default function ClockWidget() {
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <span className="w-8 h-8 border border-white/10 bg-white/[0.04] flex items-center justify-center">
-                <i className="fa-solid fa-clock text-white text-xs"></i>
+                <Clock className="text-white text-xs w-4 h-4" />
               </span>
               <div>
                 <div className="text-xs text-gray-300">当前时间</div>

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
+import { ArrowLeft, CircleHelp, Utensils, WandSparkles, TriangleAlert, List, Dice5, CircleCheck, Smile, Loader2, RotateCw } from 'lucide-react'
 
 const LS_KEY = 'lottery_options'
 
@@ -10,14 +11,14 @@ const presets = [
   {
     id: 'yesno',
     name: '是否',
-    icon: 'fa-solid fa-circle-question',
+    icon: CircleHelp,
     desc: '二元决策',
     options: ['是', '否']
   },
   {
     id: 'food',
     name: '吃什么',
-    icon: 'fa-solid fa-utensils',
+    icon: Utensils,
     desc: '日常饮食选择',
     options: [
       '火锅', '烧烤', '日料', '麻辣烫', '汉堡',
@@ -28,7 +29,7 @@ const presets = [
   {
     id: 'conch',
     name: '神奇海螺',
-    icon: 'fa-solid fa-wand-magic-sparkles',
+    icon: WandSparkles,
     desc: '趣味问答',
     options: [
       '毫无疑问', '也许吧', '再问问', '我不太确定',
@@ -108,7 +109,7 @@ export default function LotteryPage() {
     <div className="lottery-page">
       <div className="top-bar">
         <button className="back-btn" onClick={() => router.push('/')} aria-label="返回首页">
-          <i className="fa-solid fa-arrow-left"></i>
+          <ArrowLeft className="w-4 h-4" />
           <span>返回</span>
         </button>
         <div className="page-title">
@@ -125,7 +126,7 @@ export default function LotteryPage() {
             exit={{ opacity: 0 }}
             className="error-banner"
           >
-            <i className="fa-solid fa-triangle-exclamation"></i>
+            <TriangleAlert className="w-4 h-4" />
             <span>{error}</span>
           </motion.div>
         )}
@@ -134,25 +135,28 @@ export default function LotteryPage() {
       <div className="presets">
         <span className="presets-label">示例场景</span>
         <div className="preset-chips">
-          {presets.map((p) => (
-            <button
-              key={p.id}
-              className={`preset-chip ${activePreset === p.id ? 'active' : ''}`}
-              aria-pressed={activePreset === p.id}
-              title={p.desc}
-              onClick={() => selectPreset(p)}
-            >
-              <i className={p.icon}></i>
-              <span>{p.name}</span>
-            </button>
-          ))}
+          {presets.map((p) => {
+            const Icon = p.icon
+            return (
+              <button
+                key={p.id}
+                className={`preset-chip ${activePreset === p.id ? 'active' : ''}`}
+                aria-pressed={activePreset === p.id}
+                title={p.desc}
+                onClick={() => selectPreset(p)}
+              >
+                <Icon className="w-4 h-4" />
+                <span>{p.name}</span>
+              </button>
+            )
+          })}
         </div>
       </div>
 
       <div className="grid">
         <section className="card">
           <div className="card-head">
-            <span className="card-title"><i className="fa-solid fa-list-ul"></i> 选项列表</span>
+            <span className="card-title"><List className="w-4 h-4" /> 选项列表</span>
             <span className="opt-count">{validOptions.length} 项</span>
           </div>
           <textarea
@@ -169,7 +173,7 @@ export default function LotteryPage() {
         <section className="card result-card">
           <div className="card-head">
             <span className="card-title">
-              <i className="fa-solid fa-dice"></i> 抽取结果
+              <Dice5 className="w-4 h-4" /> 抽取结果
             </span>
           </div>
 
@@ -177,7 +181,7 @@ export default function LotteryPage() {
             <div className="stage-inner">
               <div className={`stage-state ${result ? '' : 'hidden'}`}>
                 <div className="result-pick">
-                  <i className="fa-solid fa-check-circle"></i>
+                  <CircleCheck className="w-8 h-8" />
                   <span className="pick-text">{result}</span>
                 </div>
               </div>
@@ -186,7 +190,7 @@ export default function LotteryPage() {
               </div>
               <div className={`stage-state ${result || isDrawing ? 'hidden' : ''}`}>
                 <div className="stage-empty">
-                  <i className="fa-regular fa-face-smile"></i>
+                  <Smile className="w-10 h-10" />
                   <p>点击「开始抽取」试试手气</p>
                 </div>
               </div>
@@ -195,11 +199,11 @@ export default function LotteryPage() {
 
           <button className="primary-btn" onClick={() => draw()} disabled={isDrawing || validOptions.length < 1}>
             {isDrawing ? (
-              <><i className="fa-solid fa-spinner fa-spin"></i> 抽取中…</>
+              <><Loader2 className="w-4 h-4 animate-spin" /> 抽取中…</>
             ) : result ? (
-              <><i className="fa-solid fa-rotate-right"></i> 再抽一次</>
+              <><RotateCw className="w-4 h-4" /> 再抽一次</>
             ) : (
-              <><i className="fa-solid fa-dice"></i> 开始抽取</>
+              <><Dice5 className="w-4 h-4" /> 开始抽取</>
             )}
           </button>
         </section>

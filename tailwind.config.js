@@ -4,6 +4,7 @@ module.exports = {
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./features/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   darkMode: "class",
   theme: {
@@ -33,15 +34,10 @@ module.exports = {
           100: '#444444',
         },
         neon: {
-          rose: '#f5f5f5',
           pink: '#e5e5e5',
-          blush: '#d4d4d4',
-          crimson: '#e5e5e5',
-          wine: '#a3a3a3',
           cyan: '#d4d4d4',
           purple: '#e5e5e5',
           orange: '#d4d4d4',
-          red: '#e5e5e5',
           green: '#ffffff',
         }
       },

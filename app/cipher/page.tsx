@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
+import { ArrowLeft, Info, TriangleAlert, ShieldHalf, Lock, LockOpen, Code2, PawPrint, RotateCcw, Loader2, Copy, Download } from 'lucide-react'
 
 const MODES = [
   { value: 'encrypt' as const, label: '加密' },
@@ -10,9 +11,9 @@ const MODES = [
 ]
 
 const ALGOS = [
-  { value: 'aes' as const, label: '口令加密', icon: 'fa-solid fa-lock' },
-  { value: 'base64' as const, label: 'Base64', icon: 'fa-solid fa-code' },
-  { value: 'beast' as const, label: '兽音译者', icon: 'fa-solid fa-paw' },
+  { value: 'aes' as const, label: '口令加密', icon: Lock },
+  { value: 'base64' as const, label: 'Base64', icon: Code2 },
+  { value: 'beast' as const, label: '兽音译者', icon: PawPrint },
 ]
 
 const DEFAULT_BEAST = '嗷呜啊~'
@@ -329,7 +330,7 @@ export default function CipherPage() {
     <div className="cipher-page">
       <div className="top-bar">
         <button className="back-btn" onClick={() => router.push('/')} aria-label="返回首页">
-          <i className="fa-solid fa-arrow-left"></i>
+          <ArrowLeft className="w-4 h-4" />
           <span>返回</span>
         </button>
         <div className="page-title">
@@ -339,7 +340,7 @@ export default function CipherPage() {
       </div>
 
       <div className="info-banner">
-        <i className="fa-solid fa-circle-info"></i>
+        <Info className="w-4 h-4" />
         <span>仅供临时传小秘密，<b>非高安全场景</b>，请勿用于真正敏感的数据。</span>
       </div>
 
@@ -351,7 +352,7 @@ export default function CipherPage() {
             exit={{ opacity: 0 }}
             className="error-banner"
           >
-            <i className="fa-solid fa-triangle-exclamation"></i>
+            <TriangleAlert className="w-4 h-4" />
             <span>{error}</span>
           </motion.div>
         )}
@@ -359,7 +360,7 @@ export default function CipherPage() {
 
       <section className="card">
         <div className="card-head">
-          <span className="card-title"><i className="fa-solid fa-shield-halved"></i> 加解密</span>
+          <span className="card-title"><ShieldHalf className="w-4 h-4" /> 加解密</span>
           <div className="segmented" role="group" aria-label="模式">
             {MODES.map((m) => (
               <button
@@ -383,7 +384,7 @@ export default function CipherPage() {
                 className={`seg-btn ${algo === a.value ? 'active' : ''}`}
                 onClick={() => setAlgoHandler(a.value)}
               >
-                <i className={a.icon}></i> {a.label}
+                <a.icon className="w-4 h-4" /> {a.label}
               </button>
             ))}
             <div className="seg-indicator algo" style={{ transform: `translateX(${algoIndex * 100}%)` }}></div>
@@ -393,13 +394,13 @@ export default function CipherPage() {
         {algo === 'beast' && (
           <>
             <p className="beast-hint">
-              <i className="fa-solid fa-paw"></i> 兽音译者为趣味编码，结果可被任意人还原，<b>不含保密性</b>，请勿用于真实秘密。
+              <PawPrint className="w-4 h-4" /> 兽音译者为趣味编码，结果可被任意人还原，<b>不含保密性</b>，请勿用于真实秘密。
             </p>
             <div className="beast-dict">
               <div className="beast-dict-head">
                 <span className="field-label" style={{ margin: 0 }}>兽音字符（输入 4 个，顺序不限）</span>
                 <button type="button" className="mini-btn" onClick={resetBeastChars} aria-label="恢复默认兽音">
-                  <i className="fa-solid fa-rotate-left"></i> 恢复默认
+                  <RotateCcw className="w-4 h-4" /> 恢复默认
                 </button>
               </div>
               <input
@@ -451,15 +452,15 @@ export default function CipherPage() {
 
         <button className="primary-btn" onClick={run} disabled={isWorking}>
           {isWorking ? (
-            <><i className="fa-solid fa-spinner fa-spin"></i> 处理中…</>
+            <><Loader2 className="w-4 h-4 animate-spin" /> 处理中…</>
           ) : algo === 'beast' ? (
-            <><i className="fa-solid fa-paw"></i> {mode === 'encrypt' ? '开始编码' : '开始解码'}</>
+            <><PawPrint className="w-4 h-4" /> {mode === 'encrypt' ? '开始编码' : '开始解码'}</>
           ) : algo === 'base64' ? (
-            <><i className="fa-solid fa-code"></i> {mode === 'encrypt' ? '开始编码' : '开始解码'}</>
+            <><Code2 className="w-4 h-4" /> {mode === 'encrypt' ? '开始编码' : '开始解码'}</>
           ) : mode === 'encrypt' ? (
-            <><i className="fa-solid fa-lock"></i> 开始加密</>
+            <><Lock className="w-4 h-4" /> 开始加密</>
           ) : (
-            <><i className="fa-solid fa-unlock"></i> 开始解密</>
+            <><LockOpen className="w-4 h-4" /> 开始解密</>
           )}
         </button>
 
@@ -475,10 +476,10 @@ export default function CipherPage() {
                 <span className="field-label">结果</span>
                 <div className="output-actions">
                   <button className="mini-btn" onClick={copyOutput} aria-label="复制结果">
-                    <i className="fa-regular fa-copy"></i> 复制
+                    <Copy className="w-4 h-4" /> 复制
                   </button>
                   <button className="mini-btn" onClick={downloadOutput} aria-label="下载结果">
-                    <i className="fa-solid fa-download"></i> 下载
+                    <Download className="w-4 h-4" /> 下载
                   </button>
                 </div>
               </div>

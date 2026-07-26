@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
+import { Quote } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 
 export default function SayingWidget() {
@@ -57,7 +58,7 @@ export default function SayingWidget() {
       <Card className="bg-dark-700/60 border-dark-600 w-full h-full">
         <CardContent className="p-5 min-h-40 flex flex-col">
           <div className="flex items-center gap-2 mb-5">
-            <i className="fa-solid fa-quote-left text-neon-purple"></i>
+            <Quote className="text-neon-purple w-4 h-4" />
             <span className="text-xs text-gray-400">一言</span>
           </div>
 

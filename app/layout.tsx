@@ -1,10 +1,41 @@
 import type { Metadata } from 'next'
 import './globals.css'
 
+const SITE_URL = 'https://re.zh.kg'
+const SITE_NAME = 'flygeon'
+const SITE_DESC = 'flygeon 的个人导航页 —— 博客、项目、工具与在线小玩意的聚合入口。'
+
 export const metadata: Metadata = {
-  metadataBase: new URL('https://re.zh.kg'),
-  title: 'flygeon',
-  description: '个人导航页',
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SITE_NAME,
+    template: `%s · ${SITE_NAME}`,
+  },
+  description: SITE_DESC,
+  keywords: ['flygeon', '个人导航', '博客', '导航页', 'homepage'],
+  authors: [{ name: SITE_NAME, url: SITE_URL }],
+  icons: {
+    icon: '/avatar.webp',
+    apple: '/avatar.webp',
+  },
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'zh_CN',
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    title: SITE_NAME,
+    description: SITE_DESC,
+    images: [{ url: '/avatar.webp', width: 512, height: 512, alt: SITE_NAME }],
+  },
+  twitter: {
+    card: 'summary',
+    title: SITE_NAME,
+    description: SITE_DESC,
+    images: ['/avatar.webp'],
+  },
 }
 
 export default function RootLayout({

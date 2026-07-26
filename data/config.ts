@@ -1,3 +1,5 @@
+import { Code2, Server, Palette, Languages, type LucideIcon } from 'lucide-react'
+
 export interface MusicItem {
   id: number
   title: string
@@ -44,7 +46,7 @@ export interface Skill {
 
 export interface SkillCategory {
   name: string
-  icon: string
+  icon: LucideIcon
   skills: Skill[]
 }
 
@@ -52,6 +54,27 @@ export interface LinkTransitionConfig {
   enabled: boolean
   delayMs: number
   particleCount: number
+}
+
+export interface FortuneLevel {
+  /** 运势等级名称，如「大吉」 */
+  label: string
+  /** 权重，数值越大越容易抽到 */
+  weight: number
+  /** 白色文字的亮度（0-1），越高表示越吉利 */
+  tone: number
+}
+
+export interface FortuneConfig {
+  levels: FortuneLevel[]
+  /** 幸运色候选（纯文字内容，不影响界面配色） */
+  colors: string[]
+  /** 「宜」候选事项 */
+  good: string[]
+  /** 「忌」候选事项 */
+  bad: string[]
+  /** 签语候选 */
+  blessings: string[]
 }
 
 export const config = {
@@ -124,6 +147,37 @@ export const config = {
     particleCount: 24
   } as LinkTransitionConfig,
 
+  fortune: {
+    // 权重之和决定概率分布，越靠前越吉；tone 控制文字亮度（越亮越吉）
+    levels: [
+      { label: '大吉', weight: 3, tone: 1 },
+      { label: '中吉', weight: 6, tone: 0.9 },
+      { label: '小吉', weight: 8, tone: 0.8 },
+      { label: '吉', weight: 8, tone: 0.72 },
+      { label: '末吉', weight: 6, tone: 0.6 },
+      { label: '凶', weight: 3, tone: 0.42 }
+    ],
+    colors: ['月白', '黛蓝', '霜灰', '墨黑', '缃色', '藕荷', '绯红', '竹青', '鸦青', '素银'],
+    good: [
+      '写代码', '读书', '听歌', '早睡', '出门走走', '整理房间',
+      '联系老友', '尝试新事物', '喝奶茶', '追番', '备份数据', '重构旧项目'
+    ],
+    bad: [
+      '熬夜', '拖延', '冲动消费', '硬刚 Bug', '空腹敲代码', '过度刷手机',
+      '和产品经理争论', '强行上线', '省略测试', '深夜 emo', '乱删文件', '不写注释'
+    ],
+    blessings: [
+      '所求皆如愿，所行皆坦途。',
+      '今日宜静心，编译一次即过。',
+      '风起于青萍之末，好运正在路上。',
+      '慢一点没关系，方向对就好。',
+      '未提交的代码，终会遇到它的 commit。',
+      '愿你今日的报错都有清晰的堆栈。',
+      '星光不问赶路人，时光不负有心人。',
+      '心之所向，素履以往。'
+    ]
+  } as FortuneConfig,
+
   devices: {
     categories: [
       {
@@ -182,7 +236,7 @@ export const config = {
     categories: [
       {
         name: '前端技术',
-        icon: 'fa-solid fa-code',
+        icon: Code2,
         skills: [
           { name: 'HTML / CSS', level: 'advanced' as const },
           { name: 'Astro', level: 'intermediate' as const },
@@ -193,7 +247,7 @@ export const config = {
       },
       {
         name: '后端 & 工具',
-        icon: 'fa-solid fa-server',
+        icon: Server,
         skills: [
           { name: 'Git', level: 'advanced' as const },
           { name: 'Node.js', level: 'intermediate' as const },
@@ -204,7 +258,7 @@ export const config = {
       },
       {
         name: '创意工具',
-        icon: 'fa-solid fa-palette',
+        icon: Palette,
         skills: [
           { name: 'Vocaloid 调教', level: 'advanced' as const },
           { name: '视频剪辑', level: 'intermediate' as const },
@@ -214,7 +268,7 @@ export const config = {
       },
       {
         name: '语言能力',
-        icon: 'fa-solid fa-language',
+        icon: Languages,
         skills: [
           { name: '中文', level: 'advanced' as const },
           { name: 'English', level: 'intermediate' as const },

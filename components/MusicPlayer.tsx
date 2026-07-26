@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react'
+import { useState, useRef, useEffect, useCallback, forwardRef, useImperativeHandle, type ComponentType } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { ArrowUp, SkipBack, SkipForward, Pause, Play, Repeat, Shuffle, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import Image from 'next/image'
@@ -76,10 +77,10 @@ function parseLyrics(source: string): LyricLine[] {
     .sort((a, b) => a.time - b.time)
 }
 
-const MODE_META: Record<PlayMode, { icon: string; label: string }> = {
-  list: { icon: 'fa-solid fa-repeat', label: '列表循环' },
-  single: { icon: 'fa-solid fa-repeat', label: '单曲循环' },
-  shuffle: { icon: 'fa-solid fa-shuffle', label: '随机播放' },
+const MODE_META: Record<PlayMode, { icon: ComponentType<{ className?: string }>; label: string }> = {
+  list: { icon: Repeat, label: '列表循环' },
+  single: { icon: Repeat, label: '单曲循环' },
+  shuffle: { icon: Shuffle, label: '随机播放' },
 }
 
 export interface MusicPlayerHandle {
@@ -350,6 +351,7 @@ const MusicPlayer = forwardRef<MusicPlayerHandle, MusicPlayerProps>(function Mus
 
   const btnSize = 'w-12 h-12'
   const btnClass = 'bg-dark-800/90 border border-dark-600 border-r-0 backdrop-blur-xl flex items-center justify-center shadow-lg transition-colors'
+  const ModeIcon = MODE_META[playMode].icon
 
   return (
     <div ref={menuRef}>
@@ -379,7 +381,7 @@ const MusicPlayer = forwardRef<MusicPlayerHandle, MusicPlayerProps>(function Mus
                 className="object-cover w-full h-full"
               />
               <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity">
-                <i className={`fa-solid ${isPlaying ? 'fa-pause' : 'fa-play'} text-white text-sm`}></i>
+                {isPlaying ? <Pause className="text-white text-sm w-4 h-4" /> : <Play className="text-white text-sm w-4 h-4" />}
               </div>
             </motion.button>
 
@@ -429,26 +431,26 @@ const MusicPlayer = forwardRef<MusicPlayerHandle, MusicPlayerProps>(function Mus
                               onClick={playPrev}
                               className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
                             >
-                              <i className="fa-solid fa-backward text-[10px]"></i>
+                              <SkipBack className="text-[10px] w-4 h-4" />
                             </button>
                             <button
                               onClick={togglePlay}
                               className="w-7 h-7 flex items-center justify-center rounded-sm bg-neon-green/15 text-neon-green border border-neon-green/40 hover:bg-neon-green/25 transition-all"
                             >
-                              <i className={`fa-solid ${isPlaying ? 'fa-pause' : 'fa-play'} text-[11px]`}></i>
+                              {isPlaying ? <Pause className="text-[11px] w-4 h-4" /> : <Play className="text-[11px] w-4 h-4" />}
                             </button>
                             <button
                               onClick={playNext}
                               className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
                             >
-                              <i className="fa-solid fa-forward text-[10px]"></i>
+                              <SkipForward className="text-[10px] w-4 h-4" />
                             </button>
                             <button
                               onClick={cycleMode}
                               title={MODE_META[playMode].label}
                               className="relative w-6 h-6 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
                             >
-                              <i className={`${MODE_META[playMode].icon} text-[10px]`}></i>
+                              <ModeIcon className="text-[10px] w-4 h-4" />
                               {playMode === 'single' && (
                                 <span className="absolute top-0 right-0 text-[7px] font-bold text-white">1</span>
                               )}
@@ -515,7 +517,7 @@ const MusicPlayer = forwardRef<MusicPlayerHandle, MusicPlayerProps>(function Mus
                           animate={{ rotate: 360 }}
                           transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
                         >
-                          <i className="fa-solid fa-spinner text-neon-green"></i>
+                          <Loader2 className="text-neon-green w-4 h-4" />
                         </motion.div>
                       )}
                     </Button>
@@ -549,9 +551,9 @@ const MusicPlayer = forwardRef<MusicPlayerHandle, MusicPlayerProps>(function Mus
           onTouchEnd={endPress}
           title="单击回到顶部 / 双击下一首 / 长按展开音乐"
           aria-label="单击回到顶部 / 双击下一首 / 长按展开音乐"
-          className={`hidden sm:block ${btnSize} rounded-l-sm ${btnClass} text-gray-400 hover:text-white hover:border-white/30`}
+          className={`hidden sm:flex ${btnSize} rounded-l-sm ${btnClass} text-gray-400 hover:text-white hover:border-white/30`}
         >
-          <i className="fa-solid fa-arrow-up text-sm"></i>
+          <ArrowUp className="text-sm w-5 h-5" />
         </motion.button>
 
         {/* 移动端：仅返回顶部功能 */}
@@ -562,7 +564,7 @@ const MusicPlayer = forwardRef<MusicPlayerHandle, MusicPlayerProps>(function Mus
           aria-label="返回顶部"
           className={`sm:hidden ${btnSize} rounded-l-sm ${btnClass} text-gray-400 hover:text-white hover:border-white/30`}
         >
-          <i className="fa-solid fa-arrow-up text-sm"></i>
+          <ArrowUp className="text-sm w-5 h-5" />
         </motion.button>
       </motion.div>
 

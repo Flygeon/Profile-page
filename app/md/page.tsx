@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
+import { ArrowLeft, TriangleAlert, SquarePen, WandSparkles, Copy, Download } from 'lucide-react'
 
 const VIEWS = [
   { value: 'edit' as const, label: '编辑' },
@@ -246,7 +247,7 @@ export default function MarkdownPreviewPage() {
     <div className="md-page">
       <div className="top-bar">
         <button className="back-btn" onClick={() => router.push('/')} aria-label="返回首页">
-          <i className="fa-solid fa-arrow-left"></i>
+          <ArrowLeft className="w-4 h-4" />
           <span>返回</span>
         </button>
         <div className="page-title">
@@ -263,7 +264,7 @@ export default function MarkdownPreviewPage() {
             exit={{ opacity: 0 }}
             className="error-banner"
           >
-            <i className="fa-solid fa-triangle-exclamation"></i>
+            <TriangleAlert className="w-4 h-4" />
             <span>{error}</span>
           </motion.div>
         )}
@@ -271,7 +272,7 @@ export default function MarkdownPreviewPage() {
 
       <section className="card">
         <div className="card-head">
-          <span className="card-title"><i className="fa-solid fa-pen-to-square"></i> 编辑器</span>
+          <span className="card-title"><SquarePen className="w-4 h-4" /> 编辑器</span>
           <div className="segmented" role="group" aria-label="视图模式">
             {VIEWS.map((v) => (
               <button
@@ -310,13 +311,13 @@ export default function MarkdownPreviewPage() {
 
         <div className="md-actions">
           <button className="ghost-btn" onClick={loadSample}>
-            <i className="fa-solid fa-wand-sparkles"></i> 加载示例
+            <WandSparkles className="w-4 h-4" /> 加载示例
           </button>
           <button className="ghost-btn" onClick={copyHtml} disabled={isEmpty}>
-            <i className="fa-regular fa-copy"></i> 复制 HTML
+            <Copy className="w-4 h-4" /> 复制 HTML
           </button>
           <button className="primary-btn" onClick={downloadMd} disabled={isEmpty}>
-            <i className="fa-solid fa-download"></i> 下载 .md
+            <Download className="w-4 h-4" /> 下载 .md
           </button>
         </div>
       </section>

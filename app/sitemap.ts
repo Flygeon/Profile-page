@@ -3,7 +3,7 @@ import type { MetadataRoute } from 'next'
 const siteUrl = 'https://re.zh.kg'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const routes = ['', '/posts', '/convert', '/md', '/lottery', '/cipher', '/sponsors']
+  const routes = ['', '/posts', '/convert', '/md', '/lottery', '/fortune', '/cipher', '/sponsors']
 
   return routes.map((route) => ({
     url: `${siteUrl}${route}`,

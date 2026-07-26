@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Milestone, ChevronUp, ChevronDown } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { config } from '@/data/config'
@@ -17,7 +18,7 @@ export default function Timeline() {
       <CardContent className="p-5">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-200 flex items-center gap-2">
-            <i className="fa-solid fa-timeline text-neon-cyan"></i>
+            <Milestone className="text-neon-cyan w-4 h-4" />
             时间线
           </h3>
           {config.timeline.length > MAX_VISIBLE && (
@@ -27,7 +28,7 @@ export default function Timeline() {
               onClick={() => setExpanded(!expanded)}
               className="text-xs text-gray-400 hover:text-neon-cyan h-7"
             >
-              <i className={`fa-solid ${expanded ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
+              {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               {expanded ? '收起' : '查看全部'}
             </Button>
           )}

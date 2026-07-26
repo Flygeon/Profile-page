@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { ListChecks, Check } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { config } from '@/data/config'
@@ -34,7 +35,7 @@ export default function TodoWidget() {
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <i className="fa-solid fa-list-check text-neon-green"></i>
+              <ListChecks className="text-neon-green w-4 h-4" />
               <span className="text-xs text-gray-400">待办</span>
             </div>
             <span className="text-xs text-gray-500">{completedCount}/{todos.length}</span>
@@ -62,7 +63,7 @@ export default function TodoWidget() {
                     }`}
                   >
                     {todo.done && (
-                      <i className="fa-solid fa-check text-xs text-neon-green"></i>
+                      <Check className="text-xs text-neon-green w-3 h-3" />
                     )}
                   </div>
                   <span

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { Mail, MapPin, Info } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { config } from '@/data/config'
 
@@ -34,11 +35,11 @@ export default function BioSection() {
               <h4 className="text-sm font-semibold text-gray-300 mb-2">联系方式</h4>
               <div className="space-y-2">
                 <div className="flex items-center gap-3 text-sm text-gray-400">
-                  <i className="fa-solid fa-envelope text-neon-green"></i>
+                  <Mail className="text-neon-green w-4 h-4" />
                   <span>Salt@flygeon.top</span>
                 </div>
                 <div className="flex items-center gap-3 text-sm text-gray-400">
-                  <i className="fa-solid fa-location-dot text-neon-cyan"></i>
+                  <MapPin className="text-neon-cyan w-4 h-4" />
                   <span>中国·安徽</span>
                 </div>
               </div>
@@ -72,7 +73,7 @@ export default function BioSection() {
                     ))}
                   </div>
                   <p className="text-xs text-gray-500 flex items-start gap-2">
-                    <i className="fa-solid fa-info-circle mt-0.5"></i>
+                    <Info className="mt-0.5 w-4 h-4" />
                     {device.usage}
                   </p>
                 </motion.div>
@@ -92,7 +93,7 @@ export default function BioSection() {
                 transition={{ delay: catIndex * 0.1 }}
               >
                 <div className="flex items-center gap-2 mb-3">
-                  <i className={`${category.icon} text-neon-purple`}></i>
+                  <category.icon className="w-4 h-4 text-neon-purple" />
                   <span className="text-sm font-semibold text-gray-300">{category.name}</span>
                 </div>
                 <div className="space-y-3">

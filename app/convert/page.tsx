@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
+import { ArrowLeft, TriangleAlert, FileInput, CloudUpload, RotateCcw, SlidersHorizontal, Loader2, WandSparkles, CircleCheck, Download } from 'lucide-react'
 
 const FORMATS = [
   { value: 'png' as const, label: 'PNG', note: '无损 · 支持透明' },
@@ -227,7 +228,7 @@ export default function ConvertPage() {
     <div className="convert-page">
       <div className="top-bar">
         <button className="back-btn" onClick={() => router.push('/')} aria-label="返回首页">
-          <i className="fa-solid fa-arrow-left"></i>
+          <ArrowLeft className="w-4 h-4" />
           <span>返回</span>
         </button>
         <div className="page-title">
@@ -244,7 +245,7 @@ export default function ConvertPage() {
             exit={{ opacity: 0 }}
             className="error-banner"
           >
-            <i className="fa-solid fa-triangle-exclamation"></i>
+            <TriangleAlert className="w-4 h-4" />
             <span>{error}</span>
           </motion.div>
         )}
@@ -253,7 +254,7 @@ export default function ConvertPage() {
       <div className="grid">
         <section className="card">
           <div className="card-head">
-            <span className="card-title"><i className="fa-solid fa-file-import"></i> 选择图片</span>
+            <span className="card-title"><FileInput className="w-4 h-4" /> 选择图片</span>
           </div>
 
           {!sourceImg ? (
@@ -269,7 +270,7 @@ export default function ConvertPage() {
                 onDragLeave={onDragLeave}
                 onDrop={onDrop}
               >
-                <div className="dz-icon"><i className="fa-solid fa-cloud-arrow-up"></i></div>
+                <div className="dz-icon"><CloudUpload className="w-5 h-5" /></div>
                 <p className="dz-main">点击选择，或将图片拖拽到此处</p>
                 <p className="dz-sub">也支持 <kbd>Ctrl</kbd> + <kbd>V</kbd> 直接粘贴截图</p>
                 <button
@@ -302,14 +303,14 @@ export default function ConvertPage() {
                 <div className="meta-row"><span>尺寸</span><b>{sourceInfo.width} × {sourceInfo.height}</b></div>
                 <div className="meta-row"><span>大小</span><b>{formatBytes(sourceInfo.size)}</b></div>
               </div>
-              <button className="ghost-btn" onClick={resetAll}><i className="fa-solid fa-rotate-left"></i> 重新选择</button>
+              <button className="ghost-btn" onClick={resetAll}><RotateCcw className="w-4 h-4" /> 重新选择</button>
             </motion.div>
           )}
         </section>
 
         <section className="card">
           <div className="card-head">
-            <span className="card-title"><i className="fa-solid fa-sliders"></i> 转换设置</span>
+            <span className="card-title"><SlidersHorizontal className="w-4 h-4" /> 转换设置</span>
           </div>
 
           <div className="field">
@@ -352,9 +353,9 @@ export default function ConvertPage() {
 
           <button className="primary-btn" disabled={!sourceImg || isConverting} onClick={convert}>
             {isConverting ? (
-              <><i className="fa-solid fa-spinner fa-spin"></i> 转换中…</>
+              <><Loader2 className="w-4 h-4 animate-spin" /> 转换中…</>
             ) : (
-              <><i className="fa-solid fa-wand-magic-sparkles"></i> {convertedReady ? '重新转换' : '开始转换'}</>
+              <><WandSparkles className="w-4 h-4" /> {convertedReady ? '重新转换' : '开始转换'}</>
             )}
           </button>
         </section>
@@ -369,7 +370,7 @@ export default function ConvertPage() {
             className="card result-card"
           >
             <div className="card-head">
-              <span className="card-title"><i className="fa-solid fa-circle-check"></i> 转换完成</span>
+              <span className="card-title"><CircleCheck className="w-4 h-4" /> 转换完成</span>
             </div>
             <div className="result-body">
               <div className="preview-img-wrap result-preview">
@@ -382,7 +383,7 @@ export default function ConvertPage() {
                   <div className="meta-row save"><span>体积节省</span><b>{savingPercent}%</b></div>
                 )}
                 <button className="primary-btn download-btn" onClick={download}>
-                  <i className="fa-solid fa-download"></i> 下载 {outputName()}
+                  <Download className="w-4 h-4" /> 下载 {outputName()}
                 </button>
               </div>
             </div>

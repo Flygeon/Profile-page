@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import { ArrowLeft, Heart } from 'lucide-react'
 import { alipayQrCode, donors } from '@/data/sponsors'
 
 export default function SponsorsPage() {
@@ -20,7 +21,7 @@ export default function SponsorsPage() {
         onClick={() => router.push('/')}
         className="absolute top-5 left-5 flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
       >
-        <i className="fa-solid fa-arrow-left"></i>
+        <ArrowLeft className="w-4 h-4" />
         返回首页
       </motion.button>
 
@@ -30,7 +31,7 @@ export default function SponsorsPage() {
         className="glass-card p-8 w-full max-w-md text-center"
       >
         <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-neon-orange to-neon-pink flex items-center justify-center">
-          <i className="fa-solid fa-heart text-white text-2xl"></i>
+          <Heart className="text-white text-2xl w-6 h-6" />
         </div>
 
         <h1 className="text-xl font-bold text-white mb-2">赞赏支持</h1>
