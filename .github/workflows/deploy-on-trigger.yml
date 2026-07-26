@@ -1,38 +1,36 @@
 name: Deploy on Astro Update
 on:
   repository_dispatch:
-    types: [astro-updated]  # 监听来自 Astro 仓库的信号
+    types: [astro-updated]
+
+# ========== 关键修改：授予写入权限 ==========
+permissions:
+  contents: write  # 允许推送到代码仓库
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # 检出代码
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 安装 pnpm 包管理器
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 9.14.4
 
-      # 安装 Node.js 并配置 pnpm 缓存
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '24'
           cache: 'pnpm'
 
-      # 安装项目依赖
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
-      # 构建项目（Next.js 静态导出）
       - name: Build
         run: pnpm run build
 
-      # 调试构建产物
       - name: Debug build output
         run: |
           echo "当前目录内容："
@@ -48,22 +46,20 @@ jobs:
             exit 1
           fi
 
-      # 【关键修改】推送 out 目录到 build 分支
       - name: Push to build branch
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./out          # 修改为 out
+          publish_dir: ./out
           publish_branch: build
           force_orphan: true
           commit_message: "Deploy from Astro update ${{ github.sha }}"
 
-      # 部署到 Cloudflare Pages（推荐）或 Workers
       - name: Deploy to Cloudflare Pages
         run: |
           if [ -d "./out" ]; then
             echo "🚀 开始部署到 Cloudflare Pages..."
-            npx wrangler pages deploy ./out --project-name=您的Pages项目名
+            npx wrangler pages deploy ./out --project-name=profiles
             echo "✅ Cloudflare Pages 部署完成"
           else
             echo "❌ out 目录不存在，跳过 Pages 部署"
