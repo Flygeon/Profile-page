@@ -11,6 +11,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # ========== 新增：等待 60 秒，确保博客构建完成 ==========
+      - name: Wait for blog build to complete
+        run: |
+          echo "⏳ 检测到 Astro 更新，等待 60 秒确保博客构建完成..."
+          sleep 60
+          echo "✅ 等待完成，开始构建个人站"
+
       - name: Checkout
         uses: actions/checkout@v4
 
