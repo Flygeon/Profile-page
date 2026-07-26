@@ -14,8 +14,8 @@ jobs:
       # ========== 新增：等待 60 秒，确保博客构建完成 ==========
       - name: Wait for blog build to complete
         run: |
-          echo "⏳ 检测到 Astro 更新，等待 60 秒确保博客构建完成..."
-          sleep 60
+          echo "⏳ 检测到 Astro 更新，等待 120 秒确保博客构建完成..."
+          sleep 120
           echo "✅ 等待完成，开始构建个人站"
 
       - name: Checkout
