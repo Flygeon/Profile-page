@@ -1,0 +1,5 @@
+User-Agent: *
+Allow: /
+
+Host: https://re.zh.kg
+Sitemap: https://re.zh.kg/sitemap.xml

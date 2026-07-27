@@ -1,0 +1,85 @@
+<!DOCTYPE html><html lang="zh-CN" class="font-sans dark"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="/_next/static/css/0f4e3b76eb4fc739.css" data-precedence="next"/><link rel="stylesheet" href="/_next/static/css/338638a9b56206a5.css" data-precedence="next"/><link rel="stylesheet" href="/_next/static/css/ae8a5638981016d1.css" data-precedence="next"/><link rel="preload" as="script" fetchPriority="low" href="/_next/static/chunks/webpack-002698903a6aff62.js"/><script src="/_next/static/chunks/df4cbf25-5fbb933970621398.js" async=""></script><script src="/_next/static/chunks/541-10fe9bc18e41910d.js" async=""></script><script src="/_next/static/chunks/main-app-63305089d23bdabe.js" async=""></script><script src="/_next/static/chunks/723-c2af0f9abe5dc911.js" async=""></script><script src="/_next/static/chunks/app/lottery/page-c6df9541a6d8b1e4.js" async=""></script><title>flygeon</title><meta name="description" content="个人导航页"/><script src="/_next/static/chunks/polyfills-42372ed130431b0a.js" noModule=""></script></head><body class="antialiased bg-[#050505] text-foreground"><div class="lottery-page"><div class="top-bar"><button class="back-btn" aria-label="返回首页"><i class="fa-solid fa-arrow-left"></i><span>返回</span></button><div class="page-title"><h1>随机抽签</h1><p>每行一个选项，公平随机抽取</p></div></div><div class="presets"><span class="presets-label">示例场景</span><div class="preset-chips"><button class="preset-chip " aria-pressed="false" title="二元决策"><i class="fa-solid fa-circle-question"></i><span>是否</span></button><button class="preset-chip " aria-pressed="false" title="日常饮食选择"><i class="fa-solid fa-utensils"></i><span>吃什么</span></button><button class="preset-chip " aria-pressed="false" title="趣味问答"><i class="fa-solid fa-wand-magic-sparkles"></i><span>神奇海螺</span></button></div></div><div class="grid"><section class="card"><div class="card-head"><span class="card-title"><i class="fa-solid fa-list-ul"></i> 选项列表</span><span class="opt-count">0<!-- --> 项</span></div><textarea class="opt-input" spellCheck="false" aria-label="抽签选项，每行一个" placeholder="每行一个选项，例如：火锅 / 烧烤 / 日料"></textarea><p class="opt-hint">选项会自动保存在本地，下次打开仍在</p></section><section class="card result-card"><div class="card-head"><span class="card-title"><i class="fa-solid fa-dice"></i> 抽取结果</span></div><div class="stage "><div class="stage-inner"><div class="stage-state hidden"><div class="result-pick"><i class="fa-solid fa-check-circle"></i><span class="pick-text"></span></div></div><div class="stage-state hidden"><div class="rolling-text">…</div></div><div class="stage-state "><div class="stage-empty"><i class="fa-regular fa-face-smile"></i><p>点击「开始抽取」试试手气</p></div></div></div></div><button class="primary-btn" disabled=""><i class="fa-solid fa-dice"></i> 开始抽取</button></section></div><footer class="lottery-footer">© 2026 flygeon. All rights reserved.</footer><style>
+        .lottery-page {
+          position: relative;
+          z-index: 2;
+          max-width: 880px;
+          margin: 0 auto;
+          padding: 56px 20px 40px;
+          min-height: 100vh;
+          animation: fadeUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+        }
+        .top-bar { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 28px; }
+        .back-btn {
+          display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 14px;
+          background-color: #111111; border: 1px solid #333333; border-radius: 0;
+          color: #dddddd; font-size: 13px; cursor: pointer;
+          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); flex-shrink: 0; font-family: inherit;
+        }
+        .back-btn:hover { background-color: #222222; border-color: #666666; color: #ffffff; transform: scale(1.05); }
+        .page-title h1 { font-size: 26px; font-weight: 700; color: #ffffff; letter-spacing: 0.5px; }
+        .page-title p { font-size: 13px; color: rgba(255,255,255,0.55); margin-top: 4px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .presets { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+        .presets-label { font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.55); }
+        .preset-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+        .preset-chip {
+          display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 16px;
+          background-color: rgba(26,26,26,0.55); border: 1px solid #2a2a2a; border-radius: 0;
+          color: #dddddd; font-size: 13px; cursor: pointer;
+          transition: all 0.25s cubic-bezier(0.4,0,0.2,1); font-family: inherit;
+        }
+        .preset-chip i { font-size: 13px; color: #888888; transition: color 0.25s ease; }
+        .preset-chip:hover { background-color: #222222; border-color: #555555; color: #ffffff; transform: scale(1.04); }
+        .preset-chip.active { background-color: #ffffff; border-color: #ffffff; color: #0a0a0a; }
+        .preset-chip.active i { color: #0a0a0a; }
+        .card {
+          background-color: rgba(26,26,26,0.55); border: 1px solid #2a2a2a; border-radius: 0;
+          padding: 20px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+        }
+        .card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+        .card-title { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: #ffffff; }
+        .card-title i { color: #888888; font-size: 13px; }
+        .opt-count { font-size: 12px; color: rgba(255,255,255,0.4); font-weight: 500; }
+        .opt-input {
+          width: 100%; min-height: 280px; resize: none; background-color: #111111; border: 1px solid #2a2a2a;
+          border-radius: 0; padding: 14px; color: #e8e8e8; font-family: &#x27;SFMono-Regular&#x27;, Consolas, &#x27;Liberation Mono&#x27;, Menlo, monospace;
+          font-size: 14px; line-height: 1.7; outline: none; transition: border-color 0.2s ease;
+        }
+        .opt-input:focus { border-color: #555555; }
+        .opt-hint { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 10px; }
+        .result-card { display: flex; flex-direction: column; }
+        .stage {
+          flex: 1; display: flex; align-items: center; justify-content: center; min-height: 220px;
+          border-radius: 0; background-color: #111111; border: 1px solid #2a2a2a;
+          margin-bottom: 16px; padding: 20px; text-align: center;
+        }
+        .stage.drawing { border-color: #555555; }
+        .stage-inner { display: grid; grid-template: &quot;stack&quot; / 1fr; place-items: center; width: 100%; min-height: 180px; }
+        .stage-state { grid-area: stack; width: 100%; text-align: center; opacity: 0; visibility: hidden; transition: opacity 0.2s ease; }
+        .stage-state:not(.hidden) { opacity: 1; visibility: visible; }
+        .result-pick { display: flex; flex-direction: column; align-items: center; width: 100%; box-sizing: border-box; text-align: center; gap: 12px; color: #6ee7a8; }
+        .result-pick i { font-size: 34px; }
+        .pick-text { font-size: 24px; font-weight: 700; color: #ffffff; word-break: break-word; line-height: 1.4; }
+        .rolling-text { width: 100%; box-sizing: border-box; text-align: center; font-size: 22px; font-weight: 600; color: #cccccc; word-break: break-word; }
+        .stage-empty { display: flex; flex-direction: column; align-items: center; width: 100%; box-sizing: border-box; text-align: center; gap: 10px; color: rgba(255,255,255,0.35); }
+        .stage-empty i { font-size: 40px; opacity: 0.6; }
+        .stage-empty p { font-size: 13px; }
+        .primary-btn {
+          width: 100%; height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+          background-color: #ffffff; color: #0a0a0a; border: none; border-radius: 0;
+          font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.25s cubic-bezier(0.4,0,0.2,1); font-family: inherit;
+        }
+        .primary-btn:hover:not(:disabled) { transform: scale(1.03); box-shadow: 0 6px 20px rgba(255,255,255,0.14); }
+        .primary-btn:active:not(:disabled) { transform: scale(0.98); }
+        .primary-btn:disabled { opacity: 0.4; cursor: not-allowed; background-color: #555555; color: #aaaaaa; }
+        .error-banner { display: flex; align-items: center; gap: 10px; padding: 12px 16px; margin-bottom: 16px; background-color: rgba(220,60,60,0.12); border: 1px solid rgba(220,80,80,0.4); border-radius: 0; color: #ff9a9a; font-size: 13px; }
+        .lottery-footer { text-align: center; color: #555555; font-size: 13px; margin-top: 30px; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 720px) {
+          .lottery-page { padding: 40px 16px 30px; }
+          .grid { grid-template-columns: 1fr; }
+          .page-title h1 { font-size: 22px; }
+          .top-bar { flex-direction: column; gap: 12px; }
+          .opt-input { min-height: 200px; }
+        }
+      </style></div><script src="/_next/static/chunks/webpack-002698903a6aff62.js" async=""></script><script>(self.__next_f=self.__next_f||[]).push([0]);self.__next_f.push([2,null])</script><script>self.__next_f.push([1,"1:HL[\"/_next/static/css/0f4e3b76eb4fc739.css\",\"style\"]\n2:HL[\"/_next/static/css/338638a9b56206a5.css\",\"style\"]\n3:HL[\"/_next/static/css/ae8a5638981016d1.css\",\"style\"]\n"])</script><script>self.__next_f.push([1,"4:I[4379,[],\"\"]\n6:I[2561,[],\"ClientPageRoot\"]\n7:I[6341,[\"723\",\"static/chunks/723-c2af0f9abe5dc911.js\",\"954\",\"static/chunks/app/lottery/page-c6df9541a6d8b1e4.js\"],\"default\",1]\n8:I[3533,[],\"\"]\n9:I[6555,[],\"\"]\nb:I[2751,[],\"\"]\nc:[]\n"])</script><script>self.__next_f.push([1,"0:[\"$\",\"$L4\",null,{\"buildId\":\"5PZi10t23-7akd1za8kCJ\",\"assetPrefix\":\"\",\"urlParts\":[\"\",\"lottery\"],\"initialTree\":[\"\",{\"children\":[\"lottery\",{\"children\":[\"__PAGE__\",{}]}]},\"$undefined\",\"$undefined\",true],\"initialSeedData\":[\"\",{\"children\":[\"lottery\",{\"children\":[\"__PAGE__\",{},[[\"$L5\",[\"$\",\"$L6\",null,{\"props\":{\"params\":{},\"searchParams\":{}},\"Component\":\"$7\"}],null],null],null]},[null,[\"$\",\"$L8\",null,{\"parallelRouterKey\":\"children\",\"segmentPath\":[\"children\",\"lottery\",\"children\"],\"error\":\"$undefined\",\"errorStyles\":\"$undefined\",\"errorScripts\":\"$undefined\",\"template\":[\"$\",\"$L9\",null,{}],\"templateStyles\":\"$undefined\",\"templateScripts\":\"$undefined\",\"notFound\":\"$undefined\",\"notFoundStyles\":\"$undefined\"}]],null]},[[[[\"$\",\"link\",\"0\",{\"rel\":\"stylesheet\",\"href\":\"/_next/static/css/0f4e3b76eb4fc739.css\",\"precedence\":\"next\",\"crossOrigin\":\"$undefined\"}],[\"$\",\"link\",\"1\",{\"rel\":\"stylesheet\",\"href\":\"/_next/static/css/338638a9b56206a5.css\",\"precedence\":\"next\",\"crossOrigin\":\"$undefined\"}],[\"$\",\"link\",\"2\",{\"rel\":\"stylesheet\",\"href\":\"/_next/static/css/ae8a5638981016d1.css\",\"precedence\":\"next\",\"crossOrigin\":\"$undefined\"}]],[\"$\",\"html\",null,{\"lang\":\"zh-CN\",\"className\":\"font-sans dark\",\"children\":[\"$\",\"body\",null,{\"className\":\"antialiased bg-[#050505] text-foreground\",\"children\":[\"$\",\"$L8\",null,{\"parallelRouterKey\":\"children\",\"segmentPath\":[\"children\"],\"error\":\"$undefined\",\"errorStyles\":\"$undefined\",\"errorScripts\":\"$undefined\",\"template\":[\"$\",\"$L9\",null,{}],\"templateStyles\":\"$undefined\",\"templateScripts\":\"$undefined\",\"notFound\":[[\"$\",\"title\",null,{\"children\":\"404: This page could not be found.\"}],[\"$\",\"div\",null,{\"style\":{\"fontFamily\":\"system-ui,\\\"Segoe UI\\\",Roboto,Helvetica,Arial,sans-serif,\\\"Apple Color Emoji\\\",\\\"Segoe UI Emoji\\\"\",\"height\":\"100vh\",\"textAlign\":\"center\",\"display\":\"flex\",\"flexDirection\":\"column\",\"alignItems\":\"center\",\"justifyContent\":\"center\"},\"children\":[\"$\",\"div\",null,{\"children\":[[\"$\",\"style\",null,{\"dangerouslySetInnerHTML\":{\"__html\":\"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}\"}}],[\"$\",\"h1\",null,{\"className\":\"next-error-h1\",\"style\":{\"display\":\"inline-block\",\"margin\":\"0 20px 0 0\",\"padding\":\"0 23px 0 0\",\"fontSize\":24,\"fontWeight\":500,\"verticalAlign\":\"top\",\"lineHeight\":\"49px\"},\"children\":\"404\"}],[\"$\",\"div\",null,{\"style\":{\"display\":\"inline-block\"},\"children\":[\"$\",\"h2\",null,{\"style\":{\"fontSize\":14,\"fontWeight\":400,\"lineHeight\":\"49px\",\"margin\":0},\"children\":\"This page could not be found.\"}]}]]}]}]],\"notFoundStyles\":[]}]}]}]],null],null],\"couldBeIntercepted\":false,\"initialHead\":[null,\"$La\"],\"globalErrorComponent\":\"$b\",\"missingSlots\":\"$Wc\"}]\n"])</script><script>self.__next_f.push([1,"a:[[\"$\",\"meta\",\"0\",{\"name\":\"viewport\",\"content\":\"width=device-width, initial-scale=1\"}],[\"$\",\"meta\",\"1\",{\"charSet\":\"utf-8\"}],[\"$\",\"title\",\"2\",{\"children\":\"flygeon\"}],[\"$\",\"meta\",\"3\",{\"name\":\"description\",\"content\":\"个人导航页\"}]]\n5:null\n"])</script></body></html>

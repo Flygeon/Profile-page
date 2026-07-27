@@ -1,0 +1,98 @@
+<!DOCTYPE html><html lang="zh-CN" class="font-sans dark"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="/_next/static/css/0f4e3b76eb4fc739.css" data-precedence="next"/><link rel="stylesheet" href="/_next/static/css/338638a9b56206a5.css" data-precedence="next"/><link rel="stylesheet" href="/_next/static/css/ae8a5638981016d1.css" data-precedence="next"/><link rel="preload" as="script" fetchPriority="low" href="/_next/static/chunks/webpack-002698903a6aff62.js"/><script src="/_next/static/chunks/df4cbf25-5fbb933970621398.js" async=""></script><script src="/_next/static/chunks/541-10fe9bc18e41910d.js" async=""></script><script src="/_next/static/chunks/main-app-63305089d23bdabe.js" async=""></script><script src="/_next/static/chunks/723-c2af0f9abe5dc911.js" async=""></script><script src="/_next/static/chunks/app/md/page-c2967358208daeec.js" async=""></script><title>flygeon</title><meta name="description" content="个人导航页"/><script src="/_next/static/chunks/polyfills-42372ed130431b0a.js" noModule=""></script></head><body class="antialiased bg-[#050505] text-foreground"><div class="md-page"><div class="top-bar"><button class="back-btn" aria-label="返回首页"><i class="fa-solid fa-arrow-left"></i><span>返回</span></button><div class="page-title"><h1>Markdown 预览</h1><p>左侧书写，右侧即时渲染</p></div></div><section class="card"><div class="card-head"><span class="card-title"><i class="fa-solid fa-pen-to-square"></i> 编辑器</span><div class="segmented" role="group" aria-label="视图模式"><button class="seg-btn ">编辑</button><button class="seg-btn active">分屏</button><button class="seg-btn ">预览</button><div class="seg-indicator" style="transform:translateX(100%)"></div></div></div><div class="md-workspace split"><textarea class="md-input" spellCheck="false" aria-label="Markdown 输入" placeholder="在此输入 Markdown…"></textarea><div class="md-preview md-body"><div class="md-placeholder">在左侧输入 Markdown…</div></div></div><div class="md-actions"><button class="ghost-btn"><i class="fa-solid fa-wand-sparkles"></i> 加载示例</button><button class="ghost-btn" disabled=""><i class="fa-regular fa-copy"></i> 复制 HTML</button><button class="primary-btn" disabled=""><i class="fa-solid fa-download"></i> 下载 .md</button></div></section><footer class="md-footer">© 2026 flygeon. All rights reserved.</footer><style>
+        .md-page {
+          position: relative; z-index: 2; max-width: 960px; margin: 0 auto;
+          padding: 56px 20px 40px; min-height: 100vh;
+          animation: fadeUp 0.5s cubic-bezier(0.4,0,0.2,1) both;
+        }
+        .top-bar { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 28px; }
+        .back-btn {
+          display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 14px;
+          background-color: #111111; border: 1px solid #333333; border-radius: 0;
+          color: #dddddd; font-size: 13px; cursor: pointer;
+          transition: all 0.25s cubic-bezier(0.4,0,0.2,1); flex-shrink: 0; font-family: inherit;
+        }
+        .back-btn:hover { background-color: #222222; border-color: #666666; color: #ffffff; transform: scale(1.05); }
+        .page-title h1 { font-size: 26px; font-weight: 700; color: #ffffff; letter-spacing: 0.5px; }
+        .page-title p { font-size: 13px; color: rgba(255,255,255,0.55); margin-top: 4px; }
+        .card {
+          background-color: rgba(26,26,26,0.55); border: 1px solid #2a2a2a; border-radius: 0;
+          padding: 20px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+        }
+        .card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+        .card-title { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: #ffffff; }
+        .card-title i { color: #888888; font-size: 13px; }
+        .segmented {
+          position: relative; display: grid; grid-template-columns: repeat(3,1fr);
+          background-color: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 0; padding: 4px;
+        }
+        .seg-btn {
+          position: relative; z-index: 1; padding: 7px 4px; background: none; border: none;
+          border-radius: 0; color: #888888; font-size: 13px; font-weight: 600;
+          cursor: pointer; transition: color 0.25s ease; font-family: inherit;
+        }
+        .seg-btn.active { color: #ffffff; }
+        .seg-indicator {
+          position: absolute; top: 4px; left: 4px; width: calc((100% - 8px) / 3);
+          height: calc(100% - 8px); background-color: #2a2a2a; border-radius: 0;
+          transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); z-index: 0;
+        }
+        .md-workspace { display: grid; grid-template-columns: 1fr; gap: 16px; }
+        .md-workspace.split { grid-template-columns: 1fr 1fr; }
+        .md-input {
+          width: 100%; min-height: 340px; resize: vertical; background-color: #111111;
+          border: 1px solid #2a2a2a; border-radius: 0; padding: 14px; color: #e8e8e8;
+          font-family: &#x27;SFMono-Regular&#x27;, Consolas, &#x27;Liberation Mono&#x27;, Menlo, monospace;
+          font-size: 13px; line-height: 1.6; outline: none; transition: border-color 0.2s ease;
+        }
+        .md-input:focus { border-color: #555555; }
+        .md-preview {
+          min-height: 340px; background-color: #111111; border: 1px solid #2a2a2a;
+          border-radius: 0; padding: 16px 18px; overflow-y: auto; color: #dddddd;
+          font-size: 14px; line-height: 1.7;
+        }
+        .md-placeholder { color: rgba(255,255,255,0.35); font-size: 13px; padding-top: 8px; }
+        .md-body :global(h1), .md-body :global(h2), .md-body :global(h3), .md-body :global(h4), .md-body :global(h5), .md-body :global(h6) { color: #ffffff; line-height: 1.3; margin: 14px 0 8px; font-weight: 700; }
+        .md-body :global(h1) { font-size: 22px; }
+        .md-body :global(h2) { font-size: 19px; }
+        .md-body :global(h3) { font-size: 16px; }
+        .md-body :global(h4), .md-body :global(h5), .md-body :global(h6) { font-size: 14px; }
+        .md-body :global(p) { margin: 8px 0; }
+        .md-body :global(a) { color: #6db4ff; text-decoration: none; border-bottom: 1px solid rgba(109,180,255,0.4); }
+        .md-body :global(a:hover) { border-bottom-color: #6db4ff; }
+        .md-body :global(strong) { color: #ffffff; font-weight: 700; }
+        .md-body :global(em) { color: #eeeeee; }
+        .md-body :global(code) { background-color: #1f1f1f; border: 1px solid #2a2a2a; border-radius: 0; padding: 1px 6px; font-family: &#x27;SFMono-Regular&#x27;, Consolas, Menlo, monospace; font-size: 12.5px; color: #f0c674; }
+        .md-body :global(pre) { background-color: #0d0d0d; border: 1px solid #2a2a2a; border-radius: 0; padding: 14px 16px; overflow-x: auto; margin: 10px 0; }
+        .md-body :global(pre code) { background: none; border: none; padding: 0; color: #d6d6d6; font-size: 12.5px; }
+        .md-body :global(ul), .md-body :global(ol) { margin: 8px 0; padding-left: 22px; }
+        .md-body :global(li) { margin: 4px 0; }
+        .md-body :global(blockquote) { margin: 10px 0; padding: 8px 14px; border-left: 3px solid #555555; background-color: rgba(255,255,255,0.03); border-radius: 0; color: rgba(255,255,255,0.7); }
+        .md-body :global(hr) { border: none; border-top: 1px solid #2a2a2a; margin: 14px 0; }
+        .md-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; align-items: center; }
+        .ghost-btn {
+          display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 16px;
+          background: none; border: 1px solid #333333; border-radius: 0;
+          color: #bbbbbb; font-size: 13px; cursor: pointer; transition: all 0.2s ease; font-family: inherit;
+        }
+        .ghost-btn:hover:not(:disabled) { border-color: #666666; color: #ffffff; }
+        .ghost-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .primary-btn {
+          height: 38px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+          padding: 0 20px; background-color: #ffffff; color: #0a0a0a; border: none;
+          border-radius: 0; font-size: 13px; font-weight: 600; cursor: pointer;
+          transition: all 0.25s cubic-bezier(0.4,0,0.2,1); font-family: inherit;
+        }
+        .primary-btn:hover:not(:disabled) { transform: scale(1.03); box-shadow: 0 4px 16px rgba(255,255,255,0.12); }
+        .primary-btn:disabled { opacity: 0.4; cursor: not-allowed; background-color: #555555; color: #aaaaaa; }
+        .error-banner { display: flex; align-items: center; gap: 10px; padding: 12px 16px; margin-bottom: 16px; background-color: rgba(220,60,60,0.12); border: 1px solid rgba(220,80,80,0.4); border-radius: 0; color: #ff9a9a; font-size: 13px; }
+        .toast { position: fixed; left: 50%; bottom: 40px; transform: translateX(-50%); z-index: 50; padding: 10px 20px; background-color: rgba(20,20,20,0.92); border: 1px solid #3a3a3a; border-radius: 0; color: #ffffff; font-size: 13px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+        .md-footer { text-align: center; color: #555555; font-size: 13px; margin-top: 30px; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 720px) {
+          .md-page { padding: 40px 16px 30px; }
+          .md-workspace.split { grid-template-columns: 1fr; }
+          .page-title h1 { font-size: 22px; }
+          .top-bar { flex-direction: column; gap: 12px; }
+          .md-input, .md-preview { min-height: 260px; }
+        }
+      </style></div><script src="/_next/static/chunks/webpack-002698903a6aff62.js" async=""></script><script>(self.__next_f=self.__next_f||[]).push([0]);self.__next_f.push([2,null])</script><script>self.__next_f.push([1,"1:HL[\"/_next/static/css/0f4e3b76eb4fc739.css\",\"style\"]\n2:HL[\"/_next/static/css/338638a9b56206a5.css\",\"style\"]\n3:HL[\"/_next/static/css/ae8a5638981016d1.css\",\"style\"]\n"])</script><script>self.__next_f.push([1,"4:I[4379,[],\"\"]\n6:I[2561,[],\"ClientPageRoot\"]\n7:I[7232,[\"723\",\"static/chunks/723-c2af0f9abe5dc911.js\",\"502\",\"static/chunks/app/md/page-c2967358208daeec.js\"],\"default\",1]\n8:I[3533,[],\"\"]\n9:I[6555,[],\"\"]\nb:I[2751,[],\"\"]\nc:[]\n"])</script><script>self.__next_f.push([1,"0:[\"$\",\"$L4\",null,{\"buildId\":\"5PZi10t23-7akd1za8kCJ\",\"assetPrefix\":\"\",\"urlParts\":[\"\",\"md\"],\"initialTree\":[\"\",{\"children\":[\"md\",{\"children\":[\"__PAGE__\",{}]}]},\"$undefined\",\"$undefined\",true],\"initialSeedData\":[\"\",{\"children\":[\"md\",{\"children\":[\"__PAGE__\",{},[[\"$L5\",[\"$\",\"$L6\",null,{\"props\":{\"params\":{},\"searchParams\":{}},\"Component\":\"$7\"}],null],null],null]},[null,[\"$\",\"$L8\",null,{\"parallelRouterKey\":\"children\",\"segmentPath\":[\"children\",\"md\",\"children\"],\"error\":\"$undefined\",\"errorStyles\":\"$undefined\",\"errorScripts\":\"$undefined\",\"template\":[\"$\",\"$L9\",null,{}],\"templateStyles\":\"$undefined\",\"templateScripts\":\"$undefined\",\"notFound\":\"$undefined\",\"notFoundStyles\":\"$undefined\"}]],null]},[[[[\"$\",\"link\",\"0\",{\"rel\":\"stylesheet\",\"href\":\"/_next/static/css/0f4e3b76eb4fc739.css\",\"precedence\":\"next\",\"crossOrigin\":\"$undefined\"}],[\"$\",\"link\",\"1\",{\"rel\":\"stylesheet\",\"href\":\"/_next/static/css/338638a9b56206a5.css\",\"precedence\":\"next\",\"crossOrigin\":\"$undefined\"}],[\"$\",\"link\",\"2\",{\"rel\":\"stylesheet\",\"href\":\"/_next/static/css/ae8a5638981016d1.css\",\"precedence\":\"next\",\"crossOrigin\":\"$undefined\"}]],[\"$\",\"html\",null,{\"lang\":\"zh-CN\",\"className\":\"font-sans dark\",\"children\":[\"$\",\"body\",null,{\"className\":\"antialiased bg-[#050505] text-foreground\",\"children\":[\"$\",\"$L8\",null,{\"parallelRouterKey\":\"children\",\"segmentPath\":[\"children\"],\"error\":\"$undefined\",\"errorStyles\":\"$undefined\",\"errorScripts\":\"$undefined\",\"template\":[\"$\",\"$L9\",null,{}],\"templateStyles\":\"$undefined\",\"templateScripts\":\"$undefined\",\"notFound\":[[\"$\",\"title\",null,{\"children\":\"404: This page could not be found.\"}],[\"$\",\"div\",null,{\"style\":{\"fontFamily\":\"system-ui,\\\"Segoe UI\\\",Roboto,Helvetica,Arial,sans-serif,\\\"Apple Color Emoji\\\",\\\"Segoe UI Emoji\\\"\",\"height\":\"100vh\",\"textAlign\":\"center\",\"display\":\"flex\",\"flexDirection\":\"column\",\"alignItems\":\"center\",\"justifyContent\":\"center\"},\"children\":[\"$\",\"div\",null,{\"children\":[[\"$\",\"style\",null,{\"dangerouslySetInnerHTML\":{\"__html\":\"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}\"}}],[\"$\",\"h1\",null,{\"className\":\"next-error-h1\",\"style\":{\"display\":\"inline-block\",\"margin\":\"0 20px 0 0\",\"padding\":\"0 23px 0 0\",\"fontSize\":24,\"fontWeight\":500,\"verticalAlign\":\"top\",\"lineHeight\":\"49px\"},\"children\":\"404\"}],[\"$\",\"div\",null,{\"style\":{\"display\":\"inline-block\"},\"children\":[\"$\",\"h2\",null,{\"style\":{\"fontSize\":14,\"fontWeight\":400,\"lineHeight\":\"49px\",\"margin\":0},\"children\":\"This page could not be found.\"}]}]]}]}]],\"notFoundStyles\":[]}]}]}]],null],null],\"couldBeIntercepted\":false,\"initialHead\":[null,\"$La\"],\"globalErrorComponent\":\"$b\",\"missingSlots\":\"$Wc\"}]\n"])</script><script>self.__next_f.push([1,"a:[[\"$\",\"meta\",\"0\",{\"name\":\"viewport\",\"content\":\"width=device-width, initial-scale=1\"}],[\"$\",\"meta\",\"1\",{\"charSet\":\"utf-8\"}],[\"$\",\"title\",\"2\",{\"children\":\"flygeon\"}],[\"$\",\"meta\",\"3\",{\"name\":\"description\",\"content\":\"个人导航页\"}]]\n5:null\n"])</script></body></html>
