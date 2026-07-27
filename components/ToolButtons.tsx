@@ -16,10 +16,10 @@ interface ToolButtonsProps {
 }
 
 const toolLinks: LinkItem[] = [
-  { name: '博客', url: 'https://blog.example.com', icon: BookOpen, isInternal: false },
-  { name: '封面图制作', url: '/convert', icon: ImageIcon, isInternal: true },
-  { name: '云盘', url: 'https://drive.example.com', icon: Cloud, isInternal: false },
-  { name: '站点统计', url: 'https://analytics.example.com', icon: LineChart, isInternal: false },
+  { name: '博客', url: 'https://flygeon.top', icon: BookOpen, isInternal: false },
+  { name: '图片转换', url: '/convert', icon: ImageIcon, isInternal: true },
+  { name: 'Markdown', url: '/md', icon: Cloud, isInternal: true },
+  { name: '随机抽签', url: '/lottery', icon: LineChart, isInternal: true },
 ]
 
 export default function ToolButtons({ onNavigate }: ToolButtonsProps) {
@@ -44,7 +44,7 @@ export default function ToolButtons({ onNavigate }: ToolButtonsProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 + index * 0.05 }}
             onClick={() => handleClick(link)}
-            className="group flex items-center justify-center gap-3 h-14 rounded-sm bg-dark-800/80 border border-dark-400/50 text-gray-400 hover:text-white hover:border-neon-purple/50 btn-hover"
+            className="group flex items-center justify-center gap-3 h-14 rounded-sm bg-dark-800/80 border border-dark-400/50 text-gray-400 hover:text-white hover:border-white/40 btn-hover"
           >
             <Icon className="w-4 h-4 transition-opacity duration-250 group-hover:opacity-100" style={{ opacity: 0.85 }} />
             <span className="text-sm font-medium">{link.name}</span>

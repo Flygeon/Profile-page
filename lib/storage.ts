@@ -9,6 +9,8 @@ export interface Settings {
   showCalendar: boolean
   showTodo: boolean
   linkTransitionEnabled: boolean
+  clickEffectEnabled: boolean
+  live2dEnabled: boolean
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -19,8 +21,14 @@ const DEFAULT_SETTINGS: Settings = {
   showNotice: true,
   showCalendar: true,
   showTodo: true,
-  linkTransitionEnabled: true
+  linkTransitionEnabled: true,
+  clickEffectEnabled: true,
+  live2dEnabled: true
 }
+
+// 设置变更事件：saveSettings 时派发，供根布局挂载的组件
+// （ClickEffect / Live2DWidget 等）跨组件树响应设置面板的开关
+export const SETTINGS_EVENT = 'user-settings-changed'
 
 export function getSetting<T>(key: string): T | null {
   try {
@@ -50,6 +58,9 @@ export function getSettings(): Settings {
 
 export function saveSettings(settings: Settings): void {
   setSetting('user_settings', settings, 365)
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent<Settings>(SETTINGS_EVENT, { detail: settings }))
+  }
 }
 
 export function getLocalStorage<T>(key: string): T | null {

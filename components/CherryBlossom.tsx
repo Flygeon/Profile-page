@@ -11,6 +11,7 @@ interface Petal {
   rotation: number
   rotationSpeed: number
   drift: number
+  gradient: CanvasGradient
 }
 
 export default function CherryBlossom() {
@@ -35,15 +36,22 @@ export default function CherryBlossom() {
     const petalCount = 60
 
     for (let i = 0; i < petalCount; i++) {
+      // 渐变只依赖花瓣尺寸（绘制前已 translate），初始化时创建一次并复用，
+      // 避免每帧为每片花瓣重新分配渐变对象
+      const size = Math.random() * 8 + 4
+      const gradient = ctx.createLinearGradient(0, -size, 0, 0)
+      gradient.addColorStop(0, '#ffb7c5')
+      gradient.addColorStop(1, '#ffc0cb')
       petals.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        size: Math.random() * 8 + 4,
+        size,
         speed: Math.random() * 1.5 + 0.5,
         opacity: Math.random() * 0.4 + 0.4,
         rotation: Math.random() * Math.PI * 2,
         rotationSpeed: (Math.random() - 0.5) * 0.1,
         drift: Math.sin(Math.random() * Math.PI * 2) * 0.5,
+        gradient,
       })
     }
 
@@ -57,11 +65,7 @@ export default function CherryBlossom() {
       ctx.moveTo(0, -petal.size)
       ctx.quadraticCurveTo(petal.size * 0.5, -petal.size * 0.3, 0, 0)
       ctx.quadraticCurveTo(-petal.size * 0.5, -petal.size * 0.3, 0, -petal.size)
-
-      const gradient = ctx.createLinearGradient(0, -petal.size, 0, 0)
-      gradient.addColorStop(0, '#ffb7c5')
-      gradient.addColorStop(1, '#ffc0cb')
-      ctx.fillStyle = gradient
+      ctx.fillStyle = petal.gradient
       ctx.fill()
 
       ctx.restore()
@@ -83,12 +87,13 @@ export default function CherryBlossom() {
         drawPetal(petal)
       })
 
-      requestAnimationFrame(animate)
+      rafId = requestAnimationFrame(animate)
     }
 
-    animate()
+    let rafId = requestAnimationFrame(animate)
 
     return () => {
+      cancelAnimationFrame(rafId)
       window.removeEventListener('resize', resizeCanvas)
     }
   }, [])

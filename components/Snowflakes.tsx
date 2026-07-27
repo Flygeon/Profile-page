@@ -43,6 +43,7 @@ export default function Snowflakes() {
       })
     }
 
+    let rafId = 0
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
@@ -61,12 +62,13 @@ export default function Snowflakes() {
         ctx.fill()
       })
 
-      requestAnimationFrame(animate)
+      rafId = requestAnimationFrame(animate)
     }
 
     animate()
 
     return () => {
+      cancelAnimationFrame(rafId)
       window.removeEventListener('resize', resizeCanvas)
     }
   }, [])

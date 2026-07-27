@@ -1,4 +1,3 @@
-@import '@fortawesome/fontawesome-free/css/all.min.css';
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
@@ -142,6 +141,18 @@ body {
   background-size: 32px 32px;
   pointer-events: none;
   z-index: 1;
+}
+
+#oml2d-stage {
+  z-index: 50 !important;
+}
+
+#oml2d-canvas {
+  z-index: 1 !important;
+}
+
+#oml2d-tips {
+  z-index: 2 !important;
 }
 
 @layer base {

@@ -21,7 +21,7 @@ module.exports = {
         foreground: '#f5f5f5',
         border: '#1f1f1f',
         input: '#1f1f1f',
-        ring: '#f43f5e',
+        ring: '#e5e5e5',
         dark: {
           900: '#050505',
           800: '#0a0a0a',
@@ -62,8 +62,8 @@ module.exports = {
           '50%': { transform: 'translateY(-10px)' },
         },
         'pulse-glow': {
-          '0%, 100%': { boxShadow: '0 0 20px rgba(244, 63, 94, 0.3)' },
-          '50%': { boxShadow: '0 0 40px rgba(244, 63, 94, 0.6)' },
+          '0%, 100%': { boxShadow: '0 0 20px rgba(255, 255, 255, 0.18)' },
+          '50%': { boxShadow: '0 0 40px rgba(255, 255, 255, 0.32)' },
         },
         'grid-dots': {
           '0%': { backgroundPosition: '0 0' },

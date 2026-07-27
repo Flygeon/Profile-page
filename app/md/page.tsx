@@ -1,9 +1,35 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, TriangleAlert, SquarePen, WandSparkles, Copy, Download } from 'lucide-react'
+import {
+  ArrowLeft, TriangleAlert, SquarePen, WandSparkles, Copy, Download,
+  Bold, Italic, Strikethrough, Code, Link2, Quote, List, ListOrdered,
+  Heading1, Heading2, Heading3, SquareCode, Minus,
+} from 'lucide-react'
+import { useToast } from '@/features/toast/ToastProvider'
+import { getCaretCoordinates } from '@/features/md/caret'
+
+interface SlashItem {
+  key: string
+  label: string
+  icon: typeof Heading1
+  insert: string
+  caretBack: number
+}
+
+// 斜杠命令：在行首输入 "/" 触发，回车/点击插入对应块级语法
+const SLASH_ITEMS: SlashItem[] = [
+  { key: 'h1', label: '一级标题', icon: Heading1, insert: '# ', caretBack: 0 },
+  { key: 'h2', label: '二级标题', icon: Heading2, insert: '## ', caretBack: 0 },
+  { key: 'h3', label: '三级标题', icon: Heading3, insert: '### ', caretBack: 0 },
+  { key: 'quote', label: '引用', icon: Quote, insert: '> ', caretBack: 0 },
+  { key: 'ul', label: '无序列表', icon: List, insert: '- ', caretBack: 0 },
+  { key: 'ol', label: '有序列表', icon: ListOrdered, insert: '1. ', caretBack: 0 },
+  { key: 'code', label: '代码块', icon: SquareCode, insert: '```\n\n```', caretBack: 4 },
+  { key: 'hr', label: '分割线', icon: Minus, insert: '---\n', caretBack: 0 },
+]
 
 const VIEWS = [
   { value: 'edit' as const, label: '编辑' },
@@ -34,6 +60,29 @@ const sampleMd = [
 
 const CODE_OPEN = '\u000E'
 const CODE_CLOSE = '\u000F'
+
+interface TextStats {
+  words: number
+  chars: number
+  charsNoSpace: number
+  lines: number
+  readMin: number
+}
+
+// 中文按字计数，英文按词计数，两者相加得到「字数」
+function countStats(text: string): TextStats {
+  const cjk = (text.match(/[一-鿿぀-ヿ가-힯]/g) || []).length
+  const latin = (text.match(/[A-Za-z0-9]+(?:['’-][A-Za-z0-9]+)*/g) || []).length
+  const words = cjk + latin
+  return {
+    words,
+    chars: text.length,
+    charsNoSpace: text.replace(/\s/g, '').length,
+    lines: text ? text.split(/\r?\n/).length : 0,
+    // 中文约 300 字/分，英文约 200 词/分，折中按 300 计
+    readMin: words ? Math.max(1, Math.round(words / 300)) : 0,
+  }
+}
 
 function escapeHtml(s: string) {
   return s
@@ -178,16 +227,12 @@ export default function MarkdownPreviewPage() {
   const [viewMode, setViewMode] = useState<'edit' | 'split' | 'preview'>('split')
   const [mdText, setMdText] = useState('')
   const [error, setError] = useState('')
-  const [toast, setToast] = useState('')
+  const showToast = useToast()
 
   const viewIndex = VIEWS.findIndex((v) => v.value === viewMode)
   const isEmpty = !mdText.trim()
   const rendered = mdText.trim() ? mdToHtml(mdText) : ''
-
-  const showToast = useCallback((msg: string) => {
-    setToast(msg)
-    setTimeout(() => setToast(''), 1800)
-  }, [])
+  const stats = countStats(mdText)
 
   const loadSample = () => {
     setMdText(sampleMd)
@@ -243,6 +288,126 @@ export default function MarkdownPreviewPage() {
     setViewMode(v)
   }
 
+  // ---- 编辑增强：格式工具栏 + 斜杠命令 ----
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const [slash, setSlash] = useState({ open: false, index: 0, query: '', top: 0, left: 0 })
+  const [slashActive, setSlashActive] = useState(0)
+
+  const filteredSlash = SLASH_ITEMS.filter((it) => {
+    const q = slash.query.toLowerCase()
+    return !q || it.key.startsWith(q) || it.label.includes(slash.query)
+  })
+
+  const closeSlash = () => setSlash((prev) => (prev.open ? { ...prev, open: false } : prev))
+
+  const applyToSelection = (
+    transform: (sel: string, value: string, s: number, e: number) => { text: string; selStart: number; selEnd: number },
+  ) => {
+    const ta = textareaRef.current
+    if (!ta) return
+    const { selectionStart: s, selectionEnd: e, value } = ta
+    const { text, selStart, selEnd } = transform(value.slice(s, e), value, s, e)
+    setMdText(text)
+    requestAnimationFrame(() => {
+      ta.focus()
+      ta.setSelectionRange(selStart, selEnd)
+    })
+  }
+
+  const wrap = (before: string, after = before) =>
+    applyToSelection((sel, value, s, e) => ({
+      text: value.slice(0, s) + before + sel + after + value.slice(e),
+      selStart: s + before.length,
+      selEnd: s + before.length + sel.length,
+    }))
+
+  const insertLink = () =>
+    applyToSelection((sel, value, s, e) => {
+      const label = sel || '链接文字'
+      const inserted = `[${label}](url)`
+      const urlStart = s + 1 + label.length + 2
+      return { text: value.slice(0, s) + inserted + value.slice(e), selStart: urlStart, selEnd: urlStart + 3 }
+    })
+
+  const prefixLine = (prefix: string) =>
+    applyToSelection((sel, value, s, e) => {
+      const lineStart = value.lastIndexOf('\n', s - 1) + 1
+      return {
+        text: value.slice(0, lineStart) + prefix + value.slice(lineStart),
+        selStart: s + prefix.length,
+        selEnd: e + prefix.length,
+      }
+    })
+
+  const insertCodeBlock = () =>
+    applyToSelection((sel, value, s, e) => ({
+      text: value.slice(0, s) + '```\n' + sel + '\n```' + value.slice(e),
+      selStart: s + 4,
+      selEnd: s + 4 + sel.length,
+    }))
+
+  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const ta = e.target
+    const value = ta.value
+    setMdText(value)
+    const caret = ta.selectionStart
+    const lineStart = value.lastIndexOf('\n', caret - 1) + 1
+    const token = value.slice(lineStart, caret)
+    if (/^\/[a-z0-9]*$/i.test(token)) {
+      const coords = getCaretCoordinates(ta, lineStart)
+      setSlash({ open: true, index: lineStart, query: token.slice(1), top: coords.top + coords.height + 4, left: coords.left })
+      setSlashActive(0)
+    } else {
+      closeSlash()
+    }
+  }
+
+  const replaceSlash = (item: SlashItem) => {
+    const ta = textareaRef.current
+    if (!ta) return
+    const caret = ta.selectionStart
+    const value = ta.value
+    const text = value.slice(0, slash.index) + item.insert + value.slice(caret)
+    setMdText(text)
+    closeSlash()
+    const pos = slash.index + item.insert.length - item.caretBack
+    requestAnimationFrame(() => {
+      ta.focus()
+      ta.setSelectionRange(pos, pos)
+    })
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (!slash.open || filteredSlash.length === 0) return
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setSlashActive((i) => Math.min(i + 1, filteredSlash.length - 1))
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setSlashActive((i) => Math.max(i - 1, 0))
+    } else if (e.key === 'Enter') {
+      e.preventDefault()
+      replaceSlash(filteredSlash[Math.min(slashActive, filteredSlash.length - 1)])
+    } else if (e.key === 'Escape') {
+      closeSlash()
+    }
+  }
+
+  const TOOLBAR: { icon: typeof Bold; label: string; run: () => void }[] = [
+    { icon: Heading1, label: '一级标题', run: () => prefixLine('# ') },
+    { icon: Heading2, label: '二级标题', run: () => prefixLine('## ') },
+    { icon: Heading3, label: '三级标题', run: () => prefixLine('### ') },
+    { icon: Bold, label: '加粗', run: () => wrap('**') },
+    { icon: Italic, label: '斜体', run: () => wrap('*') },
+    { icon: Strikethrough, label: '删除线', run: () => wrap('~~') },
+    { icon: Code, label: '行内代码', run: () => wrap('`') },
+    { icon: Link2, label: '链接', run: insertLink },
+    { icon: Quote, label: '引用', run: () => prefixLine('> ') },
+    { icon: List, label: '无序列表', run: () => prefixLine('- ') },
+    { icon: ListOrdered, label: '有序列表', run: () => prefixLine('1. ') },
+    { icon: SquareCode, label: '代码块', run: insertCodeBlock },
+  ]
+
   return (
     <div className="md-page">
       <div className="top-bar">
@@ -289,14 +454,53 @@ export default function MarkdownPreviewPage() {
 
         <div className={`md-workspace ${viewMode === 'split' ? 'split' : ''}`}>
           {viewMode !== 'preview' && (
-            <textarea
-              className="md-input"
-              value={mdText}
-              onChange={(e) => setMdText(e.target.value)}
-              spellCheck={false}
-              aria-label="Markdown 输入"
-              placeholder="在此输入 Markdown…"
-            />
+            <div className="md-editor-col">
+              <div className="md-toolbar" role="toolbar" aria-label="格式工具栏">
+                {TOOLBAR.map(({ icon: Icon, label, run }, i) => (
+                  <span key={label} className="tool-slot">
+                    <button className="tool-btn" title={label} aria-label={label} onMouseDown={(e) => e.preventDefault()} onClick={run}>
+                      <Icon className="w-4 h-4" />
+                    </button>
+                    {(i === 2 || i === 7) && <span className="tool-divider" aria-hidden />}
+                  </span>
+                ))}
+              </div>
+              <div className="md-editor-wrap">
+                <textarea
+                  ref={textareaRef}
+                  className="md-input"
+                  value={mdText}
+                  onChange={handleInput}
+                  onKeyDown={handleKeyDown}
+                  onScroll={closeSlash}
+                  onBlur={() => setTimeout(closeSlash, 120)}
+                  spellCheck={false}
+                  aria-label="Markdown 输入"
+                  placeholder="在此输入 Markdown… 行首输入 / 唤起命令"
+                />
+                {slash.open && filteredSlash.length > 0 && (
+                  <div className="slash-menu" style={{ top: slash.top, left: slash.left }} role="listbox">
+                    {filteredSlash.map((item, i) => {
+                      const Icon = item.icon
+                      return (
+                        <button
+                          key={item.key}
+                          className={`slash-item ${i === slashActive ? 'active' : ''}`}
+                          onMouseEnter={() => setSlashActive(i)}
+                          onMouseDown={(e) => { e.preventDefault(); replaceSlash(item) }}
+                          role="option"
+                          aria-selected={i === slashActive}
+                        >
+                          <Icon className="w-4 h-4" />
+                          <span>{item.label}</span>
+                          <span className="slash-hint">{item.insert.trim() || '—'}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
           )}
           {viewMode !== 'edit' && (
             <div className="md-preview md-body">
@@ -307,6 +511,18 @@ export default function MarkdownPreviewPage() {
               )}
             </div>
           )}
+        </div>
+
+        <div className="md-stats" role="status" aria-live="polite" aria-label="文本统计">
+          <span className="stat"><strong>{stats.words}</strong> 字数</span>
+          <span className="stat-sep" aria-hidden>·</span>
+          <span className="stat"><strong>{stats.chars}</strong> 字符</span>
+          <span className="stat-sep" aria-hidden>·</span>
+          <span className="stat"><strong>{stats.charsNoSpace}</strong> 不含空格</span>
+          <span className="stat-sep" aria-hidden>·</span>
+          <span className="stat"><strong>{stats.lines}</strong> 行</span>
+          <span className="stat-sep" aria-hidden>·</span>
+          <span className="stat">约 <strong>{stats.readMin}</strong> 分钟阅读</span>
         </div>
 
         <div className="md-actions">
@@ -323,19 +539,6 @@ export default function MarkdownPreviewPage() {
       </section>
 
       <footer className="md-footer">© 2026 flygeon. All rights reserved.</footer>
-
-      <AnimatePresence>
-        {toast && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="toast"
-          >
-            {toast}
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <style>{`
         .md-page {
@@ -377,6 +580,33 @@ export default function MarkdownPreviewPage() {
         }
         .md-workspace { display: grid; grid-template-columns: 1fr; gap: 16px; }
         .md-workspace.split { grid-template-columns: 1fr 1fr; }
+        .md-editor-col { display: flex; flex-direction: column; min-width: 0; }
+        .md-toolbar {
+          display: flex; flex-wrap: wrap; align-items: center; gap: 2px;
+          padding: 6px 8px; background-color: #141414; border: 1px solid #2a2a2a; border-bottom: none;
+        }
+        .tool-slot { display: inline-flex; align-items: center; }
+        .tool-btn {
+          display: inline-flex; align-items: center; justify-content: center;
+          width: 30px; height: 30px; background: none; border: none; border-radius: 0;
+          color: #999999; cursor: pointer; transition: background-color 0.15s ease, color 0.15s ease;
+        }
+        .tool-btn:hover { background-color: #262626; color: #ffffff; }
+        .tool-divider { width: 1px; height: 18px; background-color: #2f2f2f; margin: 0 5px; }
+        .md-editor-wrap { position: relative; flex: 1; min-width: 0; }
+        .md-editor-wrap .md-input { min-height: 300px; }
+        .slash-menu {
+          position: absolute; z-index: 20; min-width: 184px; max-height: 264px; overflow-y: auto;
+          background-color: #1a1a1a; border: 1px solid #3a3a3a; box-shadow: 0 8px 28px rgba(0,0,0,0.5);
+        }
+        .slash-item {
+          display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px;
+          background: none; border: none; color: #bbbbbb; font-size: 13px; cursor: pointer;
+          text-align: left; font-family: inherit;
+        }
+        .slash-item.active { background-color: #2a2a2a; color: #ffffff; }
+        .slash-item > span:first-of-type { flex: 1; }
+        .slash-hint { font-family: 'SFMono-Regular', Consolas, Menlo, monospace; font-size: 11px; color: #666666; }
         .md-input {
           width: 100%; min-height: 340px; resize: vertical; background-color: #111111;
           border: 1px solid #2a2a2a; border-radius: 0; padding: 14px; color: #e8e8e8;
@@ -396,17 +626,26 @@ export default function MarkdownPreviewPage() {
         .md-body :global(h3) { font-size: 16px; }
         .md-body :global(h4), .md-body :global(h5), .md-body :global(h6) { font-size: 14px; }
         .md-body :global(p) { margin: 8px 0; }
-        .md-body :global(a) { color: #6db4ff; text-decoration: none; border-bottom: 1px solid rgba(109,180,255,0.4); }
-        .md-body :global(a:hover) { border-bottom-color: #6db4ff; }
+        .md-body :global(a) { color: #ffffff; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.35); }
+        .md-body :global(a:hover) { border-bottom-color: #ffffff; }
         .md-body :global(strong) { color: #ffffff; font-weight: 700; }
         .md-body :global(em) { color: #eeeeee; }
-        .md-body :global(code) { background-color: #1f1f1f; border: 1px solid #2a2a2a; border-radius: 0; padding: 1px 6px; font-family: 'SFMono-Regular', Consolas, Menlo, monospace; font-size: 12.5px; color: #f0c674; }
+        .md-body :global(code) { background-color: #1f1f1f; border: 1px solid #2a2a2a; border-radius: 0; padding: 1px 6px; font-family: 'SFMono-Regular', Consolas, Menlo, monospace; font-size: 12.5px; color: #e8e8e8; }
         .md-body :global(pre) { background-color: #0d0d0d; border: 1px solid #2a2a2a; border-radius: 0; padding: 14px 16px; overflow-x: auto; margin: 10px 0; }
         .md-body :global(pre code) { background: none; border: none; padding: 0; color: #d6d6d6; font-size: 12.5px; }
         .md-body :global(ul), .md-body :global(ol) { margin: 8px 0; padding-left: 22px; }
         .md-body :global(li) { margin: 4px 0; }
         .md-body :global(blockquote) { margin: 10px 0; padding: 8px 14px; border-left: 3px solid #555555; background-color: rgba(255,255,255,0.03); border-radius: 0; color: rgba(255,255,255,0.7); }
         .md-body :global(hr) { border: none; border-top: 1px solid #2a2a2a; margin: 14px 0; }
+        .md-stats {
+          display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+          margin-top: 16px; padding: 10px 14px; background-color: #111111;
+          border: 1px solid #2a2a2a; border-radius: 0;
+          font-size: 12.5px; color: #888888;
+        }
+        .md-stats .stat { display: inline-flex; align-items: baseline; gap: 5px; }
+        .md-stats .stat strong { color: #ffffff; font-weight: 600; font-variant-numeric: tabular-nums; }
+        .md-stats .stat-sep { color: #3a3a3a; }
         .md-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; align-items: center; }
         .ghost-btn {
           display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 16px;

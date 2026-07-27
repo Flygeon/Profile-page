@@ -4,6 +4,7 @@ import { useState, useEffect, type ComponentType } from 'react'
 import { motion } from 'framer-motion'
 import { CloudLightning, CloudRain, Snowflake, Cloud, CloudFog, Sun, CloudSun, TriangleAlert } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
+import Skeleton from '@/components/Skeleton'
 
 interface WeatherAlert {
   title: string
@@ -70,7 +71,21 @@ export default function WeatherWidget() {
           </div>
 
           {!weather && !error && (
-            <div className="text-xs text-gray-500 py-6 text-center">加载中…</div>
+            <div className="space-y-3" role="status" aria-label="天气加载中">
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-2.5 w-16" />
+                </div>
+                <Skeleton className="h-6 w-6 rounded-full" />
+              </div>
+              <Skeleton className="h-8 w-16" />
+              <Skeleton className="h-3 w-12" />
+              <div className="space-y-1.5 pt-1">
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-full" />
+              </div>
+            </div>
           )}
           {error && (
             <div className="text-xs text-gray-500 py-6 text-center">天气加载失败</div>

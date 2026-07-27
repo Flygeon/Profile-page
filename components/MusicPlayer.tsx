@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import Image from 'next/image'
 import { config } from '@/data/config'
+import { getLocalStorage, setLocalStorage } from '@/lib/storage'
 
 type PlayMode = 'list' | 'single' | 'shuffle'
 
@@ -89,6 +90,8 @@ export interface MusicPlayerHandle {
   playPrev: () => void
   selectSong: (index: number) => void
   seekToTime: (time: number) => void
+  /** 频谱分析节点；CORS 不可用（降级模式）时返回 null */
+  getAnalyser: () => AnalyserNode | null
 }
 
 export interface MusicPlayerState {
@@ -110,9 +113,9 @@ interface MusicPlayerProps {
 
 const MusicPlayer = forwardRef<MusicPlayerHandle, MusicPlayerProps>(function MusicPlayer({ onStateChange }, ref) {
   const [isPlaying, setIsPlaying] = useState(false)
-  const [currentIndex, setCurrentIndex] = useState(0)
+  const [currentIndex, setCurrentIndex] = useState(() => getLocalStorage<number>('music_index') ?? 0)
   const [progress, setProgress] = useState(0)
-  const [playMode, setPlayMode] = useState<PlayMode>('list')
+  const [playMode, setPlayMode] = useState<PlayMode>(() => getLocalStorage<PlayMode>('music_mode') ?? 'list')
   const [showPlaylist, setShowPlaylist] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [panelOpen, setPanelOpen] = useState(false)
@@ -121,12 +124,21 @@ const MusicPlayer = forwardRef<MusicPlayerHandle, MusicPlayerProps>(function Mus
   const [currentTime, setCurrentTime] = useState(0)
   const [loading, setLoading] = useState(true)
   const audioRef = useRef<HTMLAudioElement>(null)
-  const progressInterval = useRef<number | null>(null)
   const pressTimer = useRef<number | null>(null)
   const isLongPress = useRef(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const clickCount = useRef(0)
   const doubleClickTimer = useRef<number | null>(null)
+  const savedTimeRef = useRef<number>(getLocalStorage<number>('music_time') ?? 0)
+  const timeRestoredRef = useRef(false)
+  const lastSavedSec = useRef(-1)
+  // ---- 频谱（Web Audio）----
+  // CORS 渐进增强：先带 crossOrigin=anonymous 加载；若音频源不支持 CORS，
+  // 降级为普通播放（corsBlocked=true，永不建音频图，避免 MediaElementSource 静音整条链路）
+  const [corsBlocked, setCorsBlocked] = useState(false)
+  const audioCtxRef = useRef<AudioContext | null>(null)
+  const analyserRef = useRef<AnalyserNode | null>(null)
+  const sourceRef = useRef<MediaElementAudioSourceNode | null>(null)
 
   const currentSong = songs[currentIndex] || fallbackSongs[0]
   const currentLyricIndex = lyrics.reduce((active, line, index) => line.time <= currentTime ? index : active, -1)
@@ -153,7 +165,8 @@ const MusicPlayer = forwardRef<MusicPlayerHandle, MusicPlayerProps>(function Mus
           }))
         if (!cancelled && normalized.length) {
           setSongs(normalized)
-          setCurrentIndex(0)
+          // 保留已恢复的播放位置，超出范围才回到第一首
+          setCurrentIndex((idx) => (idx >= 0 && idx < normalized.length ? idx : 0))
         }
       } catch {
         if (!cancelled) setSongs(fallbackSongs)
@@ -207,23 +220,21 @@ const MusicPlayer = forwardRef<MusicPlayerHandle, MusicPlayerProps>(function Mus
     }
   }, [currentIndex, currentSong.url])
 
-  useEffect(() => {
-    if (isPlaying && audioRef.current) {
-      progressInterval.current = window.setInterval(() => {
-        if (audioRef.current) {
-          const duration = audioRef.current.duration || 100
-          const current = audioRef.current.currentTime || 0
-          setProgress((current / duration) * 100)
-          setCurrentTime(current)
-        }
-      }, 250)
+  // 进度同步：用原生 timeupdate 事件（约 4Hz，暂停时不触发），替代轮询定时器
+  const handleTimeUpdate = () => {
+    const audio = audioRef.current
+    if (!audio) return
+    const duration = audio.duration || 100
+    const current = audio.currentTime || 0
+    setProgress((current / duration) * 100)
+    setCurrentTime(current)
+    // 每秒持久化一次播放位置，刷新后可恢复
+    const sec = Math.floor(current)
+    if (sec !== lastSavedSec.current) {
+      lastSavedSec.current = sec
+      setLocalStorage('music_time', current)
     }
-    return () => {
-      if (progressInterval.current) {
-        clearInterval(progressInterval.current)
-      }
-    }
-  }, [isPlaying])
+  }
 
   // ---- 外部点击关闭 ----
   useEffect(() => {
@@ -239,7 +250,73 @@ const MusicPlayer = forwardRef<MusicPlayerHandle, MusicPlayerProps>(function Mus
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [menuOpen, panelOpen])
 
-  const togglePlay = () => setIsPlaying(!isPlaying)
+  // 持久化播放索引与播放模式
+  useEffect(() => {
+    setLocalStorage('music_index', currentIndex)
+  }, [currentIndex])
+
+  useEffect(() => {
+    setLocalStorage('music_mode', playMode)
+  }, [playMode])
+
+  // 首次加载元数据时恢复上次的播放进度（仅初始歌曲）
+  const handleLoadedMetadata = () => {
+    const audio = audioRef.current
+    if (!audio || timeRestoredRef.current) return
+    timeRestoredRef.current = true
+    const t = savedTimeRef.current
+    if (t > 0 && isFinite(audio.duration) && t < audio.duration) {
+      audio.currentTime = t
+      setCurrentTime(t)
+      setProgress((t / audio.duration) * 100)
+    }
+  }
+
+  // 首次播放（用户手势内）建立音频图；仅在 CORS 可用时执行
+  const ensureAudioGraph = () => {
+    const audio = audioRef.current
+    if (!audio || corsBlocked || sourceRef.current) {
+      audioCtxRef.current?.resume().catch(() => {})
+      return
+    }
+    try {
+      const ctx = new AudioContext()
+      const source = ctx.createMediaElementSource(audio)
+      const analyser = ctx.createAnalyser()
+      analyser.fftSize = 128
+      analyser.smoothingTimeConstant = 0.75
+      source.connect(analyser)
+      analyser.connect(ctx.destination)
+      audioCtxRef.current = ctx
+      sourceRef.current = source
+      analyserRef.current = analyser
+      ctx.resume().catch(() => {})
+    } catch {
+      // 音频图建立失败不影响播放
+    }
+  }
+
+  // 加载出错：若尚未建图且带着 crossOrigin，判定为音频源不支持 CORS → 摘掉重试
+  const handleAudioError = () => {
+    if (!corsBlocked && !sourceRef.current) {
+      setCorsBlocked(true)
+    }
+  }
+
+  // corsBlocked 翻转后重新加载当前曲目（React 已移除 crossOrigin 属性）
+  useEffect(() => {
+    if (!corsBlocked || !audioRef.current) return
+    audioRef.current.load()
+    if (isPlaying) {
+      audioRef.current.play().catch(() => {})
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [corsBlocked])
+
+  const togglePlay = () => {
+    if (!isPlaying) ensureAudioGraph()
+    setIsPlaying(!isPlaying)
+  }
 
   const cycleMode = () => {
     setPlayMode((prev) => (prev === 'list' ? 'single' : prev === 'single' ? 'shuffle' : 'list'))
@@ -287,6 +364,7 @@ const MusicPlayer = forwardRef<MusicPlayerHandle, MusicPlayerProps>(function Mus
         setProgress((time / audioRef.current.duration) * 100)
       }
     },
+    getAnalyser: () => analyserRef.current,
   }))
 
   useEffect(() => {
@@ -435,7 +513,7 @@ const MusicPlayer = forwardRef<MusicPlayerHandle, MusicPlayerProps>(function Mus
                             </button>
                             <button
                               onClick={togglePlay}
-                              className="w-7 h-7 flex items-center justify-center rounded-sm bg-neon-green/15 text-neon-green border border-neon-green/40 hover:bg-neon-green/25 transition-all"
+                              className="w-7 h-7 flex items-center justify-center rounded-sm bg-white text-black border border-white hover:bg-neutral-200 transition-all"
                             >
                               {isPlaying ? <Pause className="text-[11px] w-4 h-4" /> : <Play className="text-[11px] w-4 h-4" />}
                             </button>
@@ -496,7 +574,7 @@ const MusicPlayer = forwardRef<MusicPlayerHandle, MusicPlayerProps>(function Mus
                       variant={index === currentIndex ? 'default' : 'ghost'}
                       className={`w-full justify-start gap-3 ${
                         index === currentIndex
-                          ? 'bg-neon-green/20 text-neon-green'
+                          ? 'bg-white/15 text-white'
                           : 'text-gray-300 hover:text-white hover:bg-dark-700/50'
                       }`}
                       onClick={() => selectSong(index)}
@@ -517,7 +595,7 @@ const MusicPlayer = forwardRef<MusicPlayerHandle, MusicPlayerProps>(function Mus
                           animate={{ rotate: 360 }}
                           transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
                         >
-                          <Loader2 className="text-neon-green w-4 h-4" />
+                          <Loader2 className="text-white w-4 h-4" />
                         </motion.div>
                       )}
                     </Button>
@@ -568,7 +646,14 @@ const MusicPlayer = forwardRef<MusicPlayerHandle, MusicPlayerProps>(function Mus
         </motion.button>
       </motion.div>
 
-      <audio ref={audioRef} onEnded={handleEnded} />
+      <audio
+        ref={audioRef}
+        crossOrigin={corsBlocked ? undefined : 'anonymous'}
+        onEnded={handleEnded}
+        onError={handleAudioError}
+        onLoadedMetadata={handleLoadedMetadata}
+        onTimeUpdate={handleTimeUpdate}
+      />
     </div>
   )
 })
